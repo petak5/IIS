@@ -26,7 +26,7 @@ class User(Base):
         self.password = password
 
     def auth(self, password):
-        return password == password # TODO hash
+        return self.password == password # TODO hash
 
     def is_admin(self):
         return admin
@@ -57,6 +57,7 @@ class Stop(Base):
 class StopProposal(Base):
     # if the proposal is for a new stop this remains unset
     original_id = db.Column(db.Integer, db.ForeignKey('stop.id'), default=None)
+    original = db.relationship("Stop", backref="proposals")
     name = db.Column(db.String(128), nullable=False)
 
     def __init__(self, name, original=None):

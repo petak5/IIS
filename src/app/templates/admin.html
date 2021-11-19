@@ -1,11 +1,18 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Admin{% endblock %}</h1>
+<div class="container">
+  <h1>{% block title %}Admin Dashboard{% endblock %}</h1>
+<div/>
 {% endblock %}
 
-{% block content %}
-  <table>
+  {% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-12 col-lg-6">
+  <table class="table">
+    <thead>
+      <h3>Users</h3>
     <tr>
       <th>Login</th>
       <th>Password</th>
@@ -14,6 +21,8 @@
       <th>Employer</th>
       <th>Delete</th>
     </tr>
+    </thead>
+    <tbody>
     {% for user in User.query.all() %}
     <tr>
       <td>{{ user.login }}</td>
@@ -24,5 +33,61 @@
       <td>X</td>
     </tr>
     {% endfor %}
+    </tbody>
   </table>
+  </div>
+      <div class="col-12 col-lg-6">
+  <table class="table">
+    <thead>
+      <h3>Approve stops</h3>
+    <tr>
+      <th>Old Name</th>
+      <th>New Name</th>
+      <th>Approve</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for sp in StopProposal.query.all() %}
+    <tr>
+      <td>{{ sp.original.name if sp.original else '' }}</td>
+      <td>{{ sp.name }}</td>
+      <td>
+        <form action="/admin/approve_stop" method="post">
+          <input type="hidden" name="id" value="{{ sp.id }}"/>
+          <button type="submit" class="btn btn-success">Approve</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+      <div class="col-12 col-lg-6">
+  <table class="table">
+    <thead>
+      <h3>Stops</h3>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for s in Stop.query.all() %}
+    <tr>
+      <td>{{ s.id }}</td>
+      <td>{{ s.name }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <div class="col-12 col-lg-6">
+    <form action="/operator/propose_stop" method="post">
+      <h3>Propose a new stop</h3>
+      <input name="name" type="text"></input>
+          <button type="submit" class="btn btn-primary">Propose</button>
+    </form>
+  </div>
+  </div>
+  </div>
 {% endblock %}

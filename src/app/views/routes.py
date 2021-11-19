@@ -1,6 +1,6 @@
 from app import app
 from app.models import db
-from app.models import User
+from app.models import User, StopProposal, Stop
 from flask import request, session, render_template, g
 from sqlalchemy.exc import IntegrityError
 
@@ -26,7 +26,7 @@ def search():
 
 @app.route('/admin')
 def admin():
-    return render_template('admin.html', User=User)
+    return render_template('admin.html', User=User, StopProposal=StopProposal, Stop=Stop)
 
 @app.route('/admin/approve_stop', methods=['POST'])
 def admin_approve_stop():
@@ -38,11 +38,12 @@ def admin_approve_stop():
     name = stop_proposal.name
     if original_id:
         stop = Stop.query.get(original_id)
-        stop.update({ Stop.name: name })
+        stop.name = name
         db.session.delete(stop_proposal)
     else:
         stop = Stop(name)
         db.session.add(stop)
+        db.session.delete(stop_proposal)
     db.session.commit()
     return render_template("msg.html", msg="Stop approved")
 
@@ -75,6 +76,22 @@ def change_password():
     db.session.commit()
     return "Password changed"
 
+@app.route('/operator/propose_stop', methods=['POST'])
+def propose_stop():
+    original_id = request.form.get("original_id")
+    name = request.form.get("name")
+    if not name:
+        return "Invalid args", 400
+    if original_id:
+        original = Stops.query.get(original_id)
+        if not original:
+            return "Stop doesn't exist", 400
+        sp = StopProposal(name, original)
+    else:
+        sp = StopProposal(name)
+    db.session.add(sp)
+    db.session.commit()
+    return render_template('msg.html', msg="Success")
 
 @app.route('/login', methods=['GET','POST'])
 def login():
