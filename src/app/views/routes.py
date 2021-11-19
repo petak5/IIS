@@ -5,6 +5,24 @@ from app.models import User
 from flask import request, session
 from sqlalchemy.exc import IntegrityError
 
+# returns User if logged in, None otherwise
+def get_session_user():
+    user_id = session.get('user_id')
+    user = None
+    if user_id:
+        user = User.query.get(user+id)
+    return user
+
+def login_user(login, password):
+    user = User.query.filter_by(login=login).first()
+    if user is None:
+        return None
+    if user.auth(password):
+        session['user_id'] = user.id
+        return user
+    else:
+        return None
+
 @app.route('/users')
 def users():
     users = User.query.all()
@@ -15,8 +33,8 @@ def users():
 
 @app.route('/user')
 def user():
-    user_id = session.get('user_id')
-    if user_id:
+    user = get_session_user()
+    if user:
         user = User.query.get(session['user_id'])
         return f"Currently logged in as {user.login}"
     else:
@@ -46,14 +64,11 @@ def login():
         if login is None or password is None:
             return "Both login and password are required parameters"
 
-        user = User.query.filter_by(login=login).first()
+        user = login_user(login, password)
         if user is None:
-            return "User doesn't exist"
-        if user.auth(password):
-            session['user_id'] = user.id
-            return "Successfully authenticated"
+            return "Invalid user or password"
         else:
-            return "Wrong password"
+            return f"Successfully logged in as {user.login}"
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
