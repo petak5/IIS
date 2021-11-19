@@ -28,6 +28,54 @@ def search():
 def admin():
     return render_template('admin.html', User=User)
 
+@app.route('/admin/approve_stop', methods=['POST'])
+def admin_approve_stop():
+    stop_proposal_id = request.form.get("id")
+    if not stop_proposal_id:
+        return render_template("msg.html", msg="id parameter is required") # TODO
+    stop_proposal = StopProposal.query.get(stop_proposal_id)
+    original_id = stop_proposal.original_id
+    name = stop_proposal.name
+    if original_id:
+        stop = Stop.query.get(original_id)
+        stop.update({ Stop.name: name })
+        db.session.delete(stop_proposal)
+    else:
+        stop = Stop(name)
+        db.session.add(stop)
+    db.session.commit()
+    return render_template("msg.html", msg="Stop approved")
+
+@app.route('/admin/add_operator', methods=['POST'])
+def add_operator():
+    if not g.user.is_admin():
+        return "Access denied", 403
+    name = request.form.get("name")
+    user_id = request.form.get("user_id")
+    if not name or not user_id:
+        return "Invalid args", 400
+    operator = Operator(name)
+    operator.user_id = user_id
+    db.session.add(operator)
+    db.session_commit()
+    return "Operator Added"
+
+@app.route('/admin/change_password', methods=['POST'])
+def change_password():
+    if not g.user.is_admin():
+        return "Access denied", 403
+    login = request.form.get("login")
+    password = request.form.get("password")
+    if not login or not password:
+        return "Invalid args", 400
+    user = User.query.filter_by(login=login).first()
+    if not login:
+        return "User doesn't exist", 400
+    user.password = password
+    db.session.commit()
+    return "Password changed"
+
+
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'GET':
@@ -43,6 +91,7 @@ def login():
             return render_template('login_fail.html')
         else:
             return render_template('login_success.html')
+
 @app.route('/logout')
 def logout():
     try:

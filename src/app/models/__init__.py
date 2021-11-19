@@ -15,9 +15,7 @@ class User(Base):
     # gives admin privileges
     admin = db.Column(db.Boolean, nullable=False, default=False)
 
-    # gives transport operator privileges
-    operator_id = db.Column(db.Integer, db.ForeignKey('operator.id'), default=None)
-    operator = db.relationship("Operator", foreign_keys=[operator_id])
+    # operator privileges given by operator backref
 
     # gives crew privileges
     employer_id = db.Column(db.Integer, db.ForeignKey('operator.id'), default=None)
@@ -34,7 +32,7 @@ class User(Base):
         return admin
 
     def is_operator(self):
-        return operator_id is not None
+        return operator is not None
 
     def is_crew(self):
         return employer_id is not None
@@ -58,7 +56,7 @@ class Stop(Base):
 # which is then approved by an admin
 class StopProposal(Base):
     # if the proposal is for a new stop this remains unset
-    original = db.Column(db.Integer, db.ForeignKey('stop.id'), default=None)
+    original_id = db.Column(db.Integer, db.ForeignKey('stop.id'), default=None)
     name = db.Column(db.String(128), nullable=False)
 
     def __init__(self, name, original=None):
@@ -89,6 +87,8 @@ class Vehicle(Base):
 
 class Operator(Base):
     name = db.Column(db.String(128), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
+    user = db.relationship(User, backref="operator", foreign_keys=[user_id], uselist=False)
 
     def __init__(self, name):
         self.name = name
