@@ -1,16 +1,8 @@
 from app import app
 from app.models import db
 from app.models import User
-from flask import request, session
+from flask import request, session, render_template, g
 from sqlalchemy.exc import IntegrityError
-
-# returns User if logged in, None otherwise
-def get_session_user():
-    user_id = session.get('user_id')
-    user = None
-    if user_id:
-        user = User.query.get(user+id)
-    return user
 
 def login_user(login, password):
     user = User.query.filter_by(login=login).first()
@@ -22,78 +14,57 @@ def login_user(login, password):
     else:
         return None
 
-@app.route('/users')
-def users():
-    users = User.query.all()
-    response = "Login Password<br>"
-    for user in users:
-        response += f"{user.login} {user.password}<br>"
-    return response
+@app.before_request
+def load_user():
+    if "user_id" in session:
+        user_id = session["user_id"]
+        g.user = User.query.get(user_id)
 
-@app.route('/user')
-def user():
-    user = get_session_user()
-    if user:
-        user = User.query.get(session['user_id'])
-        return f"Currently logged in as {user.login}"
-    else:
-        return f"Currently logged out"
+@app.route('/')
+def search():
+    return render_template('index.html')
 
-@app.route('/logout')
-def logout():
-    if session.get('user_id'):
-        del session['user_id']
-        return "Logged out"
-    else:
-        return "Not logged in"
+@app.route('/admin')
+def admin():
+    return render_template('admin.html', User=User)
 
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'GET':
-        return """
-            <form action="login" method="post">
-                <input type="text" placeholder="Login" name="login" required>
-                <input type="password" placeholder="Password" name="password" required>
-                <button type="submit">Login</button>
-            </form>
-        """
+        return render_template('login.html')
     if request.method == 'POST':
         login = request.form.get("login")
         password = request.form.get("password")
         if login is None or password is None:
-            return "Both login and password are required parameters"
-
+            return render_template('login_fail.html')
         user = login_user(login, password)
+        load_user()
         if user is None:
-            return "Invalid user or password"
+            return render_template('login_fail.html')
         else:
-            return f"Successfully logged in as {user.login}"
+            return render_template('login_success.html')
+@app.route('/logout')
+def logout():
+    try:
+        del session['user_id']
+        del g.user
+    except KeyError or AttributeError:
+        pass
+    return render_template("logout.html")
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
-        return """
-            <form action="register" method="post">
-                <input type="text" placeholder="Login" name="login" required>
-                <input type="password" placeholder="Password" name="password" required>
-                <button type="submit">Register</button>
-            </form>
-        """
+        return render_template("register.html")
     if request.method == 'POST':
         login = request.form.get("login")
         password = request.form.get("password")
         if login is None or password is None:
-            return "Both login and password are required parameters"
+            return render_template('msg.html', msg="Both login and password are required parameters")
         user = User(login, password)
         db.session.add(user)
         try:
             db.session.commit()
-            return f"Successfully registered {user.login}"
+            return render_template('msg.html', msg=f"Successfully registered {user.login}")
         except IntegrityError:
-            return f"User '{user}' already exists"
-
-@app.route('/admin/')
-def admin():
-    return """
-
-    """
+            return render_template('msg.html', msg=f"User '{user.login}' already exists")
