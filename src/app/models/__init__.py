@@ -8,20 +8,6 @@ class Base(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-# TODO Example only delete this
-class PersonModel(Base):
-    __tablename__ = "persons_table"
-
-    name = db.Column(db.String(80))
-    age = db.Column(db.Integer)
-
-    def __init__(self, name, age):
-        self.name = name
-        self.age = age
-
-    def __repr__(self):
-        return f"{self.name}:{self.age}"
-
 class User(Base):
     login = db.Column(db.String(64), nullable=False, unique=True)
     password = db.Column(db.String(256), nullable=False) # cleartext for now
