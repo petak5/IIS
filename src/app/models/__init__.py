@@ -10,12 +10,14 @@ class Base(db.Model):
 
 class User(Base):
     login = db.Column(db.String(64), nullable=False, unique=True)
-    password = db.Column(db.String(256), nullable=False) # cleartext for now
+    password = db.Column(db.String(256)) # cleartext for now, null disables login
 
     # gives admin privileges
     admin = db.Column(db.Boolean, nullable=False, default=False)
 
-    # operator privileges given by operator backref
+    # operator privileges given if not null
+    operator_id = db.Column(db.Integer, db.ForeignKey('operator.id'), default=None)
+    operator = db.relationship("Operator", backref="users", foreign_keys=[operator_id])
 
     # gives crew privileges
     employer_id = db.Column(db.Integer, db.ForeignKey('operator.id'), default=None)
@@ -29,13 +31,13 @@ class User(Base):
         return self.password == password # TODO hash
 
     def is_admin(self):
-        return admin
+        return self.admin
 
     def is_operator(self):
-        return operator is not None
+        return self.operator_id is not None
 
     def is_crew(self):
-        return employer_id is not None
+        return self.employer_id is not None
 
 class ConnectionStop(Base):
     connection_id = db.Column(db.Integer, db.ForeignKey('connection.id'), primary_key=True)
@@ -75,7 +77,6 @@ class Connection(Base):
     def __init__(self, name):
         self.name = name
 
-
 class Vehicle(Base):
     operator_id = db.Column(db.Integer, db.ForeignKey('operator.id'), nullable=False)
     operator = db.relationship("Operator", backref="vehicles")
@@ -88,8 +89,8 @@ class Vehicle(Base):
 
 class Operator(Base):
     name = db.Column(db.String(128), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
-    user = db.relationship(User, backref="operator", foreign_keys=[user_id], uselist=False)
+#    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
+#    user = db.relationship(User, backref="operator", foreign_keys=[user_id], uselist=False)
 
     def __init__(self, name):
         self.name = name

@@ -1,15 +1,12 @@
 {% extends 'base.html' %}
 
 {% block header %}
-<div class="container">
-  <h1>{% block title %}Admin Dashboard{% endblock %}</h1>
-<div/>
 {% endblock %}
 
-  {% block content %}
+{% block content %}
   <div class="container">
-    <div class="row">
-      <div class="col-12 col-lg-6">
+    <div class="row p-3">
+      <div class="col">
   <table class="table">
     <thead>
       <h3>Users</h3>
@@ -36,7 +33,7 @@
     </tbody>
   </table>
   </div>
-      <div class="col-12 col-lg-6">
+      <div class="col">
   <table class="table">
     <thead>
       <h3>Approve stops</h3>
@@ -62,7 +59,7 @@
     </tbody>
   </table>
   </div>
-      <div class="col-12 col-lg-6">
+      <div class="col">
   <table class="table">
     <thead>
       <h3>Stops</h3>
@@ -81,7 +78,7 @@
     </tbody>
   </table>
   </div>
-  <div class="col-12 col-lg-6">
+  <div class="col">
     <form action="/operator/propose_stop" method="post">
       <h3>Propose a new stop</h3>
       <input name="name" type="text"></input>
