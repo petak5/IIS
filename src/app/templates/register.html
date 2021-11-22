@@ -6,15 +6,15 @@
 {% block content %}
 <div class="container-fluid">
   <div class="row">
-<form method="post" action="register" class="p-3 col-12 col-md-7 col-lg-5 col-xl-4 mx-auto">
-  <h3 class="mb-3">{% block title %}Register a new account{% endblock %}</h3>
+<form method="post" action="register" class="p-3 mx-auto">
+  <h4 class="mb-3">{% block title %}Register a new account{% endblock %}</h4>
   <div class="mb-3">
     <label for="login" class="form-label">Login</label>
-    <input type="text" class="form-control" name="login">
+    <input style="max-width: 30em" type="text" class="form-control" name="login">
   </div>
   <div class="mb-3">
     <label for="password" class="form-label">Password</label>
-    <input type="password" class="form-control" name="password">
+    <input style="max-width: 30em" type="password" class="form-control" name="password">
   </div>
   <button type="submit" class="btn btn-primary">Register</button>
 </form>

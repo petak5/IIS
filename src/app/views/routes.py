@@ -119,7 +119,9 @@ def admin_users():
 @auth('admin')
 def admin_users_add():
     login = request.form["login"]
-    password = request.form["password"]
+    password = request.form.get("password")
+    if password == '':
+        password = None
     user = User(login, password)
     user.admin = True if request.form.get("admin") == 'yes' else False
 
@@ -127,8 +129,8 @@ def admin_users_add():
     if operator_id:
         user.operator_id = operator_id
     employer_id = request.form.get('operator_id')
-    if emploter_id:
-        user.emploter_id = employer_id
+    if employer_id:
+        user.employer_id = employer_id
     db.session.add(user)
     try:
         db.session.commit()
@@ -157,22 +159,63 @@ def admin_users_modify():
             flash('User doesn\'t exist', 'danger')
             return redirect(g.redir)
 
+
+        user.admin = request.form.get('admin') == 'yes'
         password = request.form.get('password')
-        if password:
+        if password != None and password != '':
             user.password = password
+        login = request.form.get('login')
+        if login != None and login != '':
+            user.login = login
+        if request.form.get('disable_login') == 'yes':
+            user.password = None
         operator_id = request.form.get('operator_id')
         if operator_id:
             user.operator_id = operator_id
         employer_id = request.form.get('employer_id')
-        if emploter_id:
-            user.emploter_id = employer_id
+        if employer_id:
+            user.employer_id = employer_id
         db.session.add(user)
         try:
             db.session.commit()
             flash('Modification successful', 'success')
         except:
             flash('Unknown error', 'danger')
-        return redirection(g.redir)
+        return redirect(g.redir)
+
+@app.route('/admin/users/delete', methods=['GET','POST'])
+@auth('admin')
+def admin_users_delete():
+    if request.method == 'GET':
+        user_id = request.args.get('id', type=int)
+        user = User.query.get(user_id)
+        if not user:
+            flash('User doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('admin_users_delete.html', user=user)
+    if request.method == 'POST':
+        user_id = request.form.get("id", type=int)
+        user = User.query.get(user_id)
+        if not user:
+            flash('User doesn\'t exist', 'danger')
+            return redirect(g.redir)
+
+        delete_crew =  True if request.args.get('delete_crew') == 'yes' else False
+
+        if user.is_operator():
+            for employee in employees:
+                if delete_crew:
+                    db.session.delete(employee)
+                else:
+                    employee.employer = None
+                    db.session.add(employee)
+        db.session.delete(user)
+        try:
+            db.session.commit()
+            flash('User successfuly deleted', 'success')
+        except:
+            flash('Unknown error', 'danger')
+        return redirect(g.redir)
 
 @app.route('/admin/operators')
 @auth('admin')
