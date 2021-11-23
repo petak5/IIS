@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row p-3">
+      <div class="col">
+  <table class="table table-hover">
+    <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Role</th>
+      <th scope="col">Login</th>
+      <th scope="col">Password</th>
+      <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for user in User.query.all() %}
+    <tr>
+      <td scope="row">
+        {{ user.id }}
+        </td>
+      <td>
+        {% if user.is_admin() %}
+        <span class="badge bg-danger">Admin</span>
+        {% elif user.is_operator() %}
+        <span class="badge bg-warning">Operator</span> of {{ user.operator.name }}
+        {% elif user.is_crew() %}
+        <span class="badge bg-primary">Crew</span> of {{ user.employer.name }}
+        {% else %}
+        <span class="badge bg-secondary">User</span>
+        {% endif %}
+      </td>
+      <td>
+        {{ user.login }}
+      </td>
+      <td>
+      {% if user.password == None %}
+        <span class="badge bg-secondary">Disabled</span>
+      {% else %}
+        {{ user.password }}
+      {% endif %}
+      </td>
+      <td align="right" width="1%" nowrap>
+        <a class="btn btn-danger" href="{{ url_for('admin_users_delete', redir=url_for('admin_users'), id=user.id) }}">Delete</a>
+        <a class="btn btn-warning" href="{{ url_for('admin_users_modify', redir=url_for('admin_users'), id=user.id) }}">Modify</a>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <span>
+    <form action="{{ url_for('admin_users_add') }}" method="POST" class="g-3">
+    <label for="role" class="form-label">Role: </label>
+        <select class="form-select" name="role">
+  <option selected>Select Role</option>
+  <option value="admin">Admin</option>
+  <option value="operator">Operator</option>
+  <option value="crew">Crew</option>
+  <option value="user">User</option>
+</select>
+    <input type="text" class="form-control" name="login" placeholder="Login">
+    <input type="password" class="form-control" name="password" placeholder="Password">
+    <input type="hidden" name="redir" value="{{ url_for('admin_users') }}">
+        <button type="submit" class="col-auto btn btn-primary">Add User</button>
+    </form>
+    <p> TODO role selector not working</p>
+  </div>
+  </div>
+  </div>
+{% endblock %}

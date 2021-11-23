@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+<form method="post" action="{{ url_for('admin_users_modify') }}" class="p-3">
+  <h4 class="py-3">
+        Modifying
+        <b>{{ user.login }}</b>
+        {% if user.is_admin() %}
+        <span class="badge bg-danger">Admin</span>
+        {% elif user.is_operator() %}
+        <span class="badge bg-warning">Operator</span> of {{ user.operator.name }}
+        {% elif user.is_crew() %}
+        <span class="badge bg-primary">Crew</span> of {{ user.employer.name }}
+        {% else %}
+        <span class="badge bg-secondary">User</span>
+        {% endif %}
+      </h4>
+  <div class="mb-3">
+    <label for="login" class="form-label">New login</label>
+    <input style="max-width: 30em" type="text" class="form-control" name="login" value="{{ user.login }}">
+  </div>
+  <div class="mb-3">
+    <label for="password" class="form-label">New password</label>
+    <input style="max-width: 30em" type="password" class="form-control" name="password">
+    <div id="emailHelp" class="form-text">Leave empty to keep the original.</div>
+  </div>
+  <div class="mb-3">
+    <input type="checkbox" class="form-check-input" name="disable_login" value="yes" {{ 'checked' if user.password == None else '' }}>
+    <label for="delete_crew" class="form-check-label">Disable login (removes password)</label>
+  </div>
+  <div class="mb-3">
+    <input type="checkbox" class="form-check-input" name="admin" value="yes" {{ 'checked' if user.admin else '' }}>
+    <label for="delete_crew" class="form-check-label">Grant admin privileges</label>
+  </div>
+  <input type="hidden" name="redir" value="{{ g.redir }}">
+  <input type="hidden" name="id" value="{{ user.id }}">
+  <button type="submit" class="btn btn-warning">Modify User</button>
+</form>
+</div>
+{% endblock %}

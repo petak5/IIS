@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="row p-3">
+      <div class="col">
+  <table class="table">
+    <thead>
+      <h3>Users</h3>
+    <tr>
+      <th>Login</th>
+      <th>Password</th>
+      <th>Admin?</th>
+      <th>Operator</th>
+      <th>Employer</th>
+      <th>Delete</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for user in User.query.all() %}
+    <tr>
+      <td>{{ user.login }}</td>
+      <td>{{ user.password }}</td>
+      <td>{{ user.admin }}</td>
+      <td>{{ user.operator_id }}</td>
+      <td>{{ user.employer_id }}</td>
+      <td>X</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+      <div class="col">
+  <table class="table">
+    <thead>
+      <h3>Approve stops</h3>
+    <tr>
+      <th>Old Name</th>
+      <th>New Name</th>
+      <th>Approve</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for sp in StopProposal.query.all() %}
+    <tr>
+      <td>{{ sp.original.name if sp.original else '' }}</td>
+      <td>{{ sp.name }}</td>
+      <td>
+        <form action="/admin/approve_stop" method="post">
+          <input type="hidden" name="id" value="{{ sp.id }}"/>
+          <button type="submit" class="btn btn-success">Approve</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+      <div class="col">
+  <table class="table">
+    <thead>
+      <h3>Stops</h3>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for s in Stop.query.all() %}
+    <tr>
+      <td>{{ s.id }}</td>
+      <td>{{ s.name }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <div class="col">
+    <form action="/operator/propose_stop" method="post">
+      <h3>Propose a new stop</h3>
+      <input name="name" type="text"></input>
+          <button type="submit" class="btn btn-primary">Propose</button>
+    </form>
+  </div>
+  </div>
+  </div>
+{% endblock %}

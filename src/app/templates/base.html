@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+<body>
+  <script src="{{ url_for('static', filename='bootstrap.bundle.min.js')}}"></script>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('index') }}">ISS projekt</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+      </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto">
+        {% if g.is_auth('admin') %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Admin
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="{{ url_for('admin_users') }}">Users</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('admin_operators') }}">Operators</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('admin_stops') }}">Stops</a></li>
+          </ul>
+        </li>
+        {% endif %}
+        {% if g.is_auth('operator') %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Operator
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="{{ url_for('operator_propose_stop') }}">Propose Stop</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('operator_connections') }}">Connections</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('operator_vehicles') }}">Vehicles</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('operator_crew') }}">Crew</a></li>
+          </ul>
+        </li>
+        {% endif %}
+        {% if g.is_auth('crew') %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Crew
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="{{ url_for('crew_tickets') }}">Ticket Reservations</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('crew_positions') }}">Vehicle Positions</a></li>
+          </ul>
+        </li>
+        {% endif %}
+        {% if g.is_auth('user') %}
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('user_reserve') }}">My Tickets</a></li>
+        {% endif %}
+      </ul>
+      <ul class="navbar-nav ms-auto">
+      {% if g.user %}
+      <li class="nav-item"><a class="nav-link disabled" href="#">Logged in as {{ g.user.login }}</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Log Out</a></li>
+      {% else %}
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Log in</a></li>
+      {% endif %}
+      </ul>
+      </div>
+  </div>
+  </nav>
+  <section class="content">
+  <header>
+      {% block header %}{% endblock %}
+  </header>
+  {% for category, message in get_flashed_messages(True) %}
+  <div class="alert alert-{{ category }}" role="alert">
+    {{ message }}
+  </div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+  </section>
+</body>
