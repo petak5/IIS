@@ -26,8 +26,8 @@
               {{ stop.name }}
             </td>
             <td align="right" width="1%" nowrap>
-              <a class="btn btn-danger" href="{{ url_for('operator_stops_deletion_proposal', redir=url_for('operator_stops_proposal'), id=stop.id) }}">Delete</a>
               <a class="btn btn-warning" href="{{ url_for('operator_stops_modification_proposal', redir=url_for('operator_stops_proposal'), id=stop.id) }}">Modify</a>
+              <a class="btn btn-danger" href="{{ url_for('operator_stops_deletion_proposal', redir=url_for('operator_stops_proposal'), id=stop.id) }}">Delete</a>
             </td>
           </tr>
           {% endfor %}

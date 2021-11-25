@@ -28,8 +28,8 @@
             {{ stop.name }}
           </td>
           <td align="right" width="1%" nowrap>
-            <a class="btn btn-danger" href="{{ url_for('admin_stops_delete', redir=url_for('admin_stops'), id=stop.id) }}">Delete</a>
             <a class="btn btn-warning" href="{{ url_for('admin_stops_modify', redir=url_for('admin_stops'), id=stop.id) }}">Modify</a>
+            <a class="btn btn-danger" href="{{ url_for('admin_stops_delete', redir=url_for('admin_stops'), id=stop.id) }}">Delete</a>
           </td>
         </tr>
         {% endfor %}
