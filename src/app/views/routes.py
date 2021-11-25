@@ -83,8 +83,8 @@ def load_user():
     if g.user:
         g.operator = g.user.operator
 
-
 @app.route('/admin/stops')
+@auth('admin')
 def admin_stops():
     return render_template('admin_stops.html', StopProposal=StopProposal, Stop=Stop)
 
@@ -345,7 +345,7 @@ def admin_operators_add(): # TODO error handle
     user.operator = operator
     db.session.add(operator)
     db.session.add(user)
-    db.session_commit()
+    db.session.commit()
     flash('New operator successfuly added', 'success')
     return redirect(g.redir)
 
@@ -453,8 +453,67 @@ def operator_vehicles(): # TODO implement
 
 @app.route('/operator/crew', methods=['GET', 'POST'])
 @auth('operator')
-def operator_crew(): # TODO implement
-    return render_template('placeholder.html')
+def operator_crew():
+    if not g.user.operator:
+        return render_template('placeholder.html')
+    return render_template('operator_crew.html', User=User, operator=g.user.operator)
+
+@app.route('/operator/crew/add', methods=['POST'])
+@auth('operator')
+def operator_crew_add():
+    user_id = request.form.get("user_id", type=int)
+    user = User.query.get(user_id)
+    if not user:
+        flash('User doesn\'t exist', 'danger')
+        return redirect(g.redir)
+    user.employer = g.operator
+    db.session.commit()
+    flash('New crew successfully added.', 'success')
+    return redirect(g.redir)
+
+@app.route('/operator/crew/fire', methods=['GET', 'POST'])
+@auth('operator')
+def operator_crew_fire():
+    if request.method == 'GET':
+        user_id = request.args.get("id", type=int)
+        user = User.query.get(user_id)
+        if not user:
+            flash('User doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_crew_fire.html', user=user)
+    elif request.method == 'POST':
+        user_id = request.form.get("id", type=int)
+        user = User.query.get(user_id)
+        if not user:
+            flash('User doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        user.employer = None
+        db.session.commit()
+        flash('User successfully fired.', 'success')
+        return redirect(g.redir)
+
+@app.route('/operator/transfer', methods=['GET', 'POST'])
+@auth('operator')
+def operator_transfer():
+    if request.method == 'GET':
+        user_id = request.args.get("id", type=int)
+        user = User.query.get(user_id)
+        if not user:
+            flash('User doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_transfer.html', User=User, user=user)
+    elif request.method == 'POST':
+        user_id = request.form.get("user_id", type=int)
+        user = User.query.get(user_id)
+        if not user:
+            flash('User doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        g.user.employer = g.operator
+        g.operator.manager = user
+        user.employer = None
+        db.session.commit()
+        flash('Operator ownership successfully transferred.', 'success')
+        return redirect(g.redir)
 
 @app.route('/crew/tickets', methods=['GET', 'POST'])
 @auth('crew')

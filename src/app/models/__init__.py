@@ -17,7 +17,7 @@ class User(Base):
 
     # operator privileges given if not null
     operator_id = db.Column(db.Integer, db.ForeignKey('operator.id'), default=None)
-    operator = db.relationship("Operator", backref="users", foreign_keys=[operator_id])
+    operator = db.relationship("Operator", backref=db.backref("manager", uselist=False), foreign_keys=[operator_id])
 
     # gives crew privileges
     employer_id = db.Column(db.Integer, db.ForeignKey('operator.id'), default=None)
@@ -40,7 +40,6 @@ class User(Base):
         return self.employer_id is not None
 
 class ConnectionStop(Base):
-    connection_id = db.Column(db.Integer, db.ForeignKey('connection.id'), primary_key=True)
     stop_id = db.Column(db.Integer, db.ForeignKey('stop.id'), primary_key=True)
     stop = db.relationship("Stop", back_populates="connections")
     connection_id = db.Column(db.Integer, db.ForeignKey('connection.id'), primary_key=True)
@@ -98,7 +97,7 @@ class Operator(Base):
 class Ticket(Base):
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     num_seats = db.Column(db.Integer, nullable=False, default=1)
-    owner = db.relationship(User, backref="tikets")
+    owner = db.relationship(User, backref="tickets")
 
     def __init__(self, owner):
         self.owner = owner

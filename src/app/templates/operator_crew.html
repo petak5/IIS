@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row p-3">
+      <div class="col">
+
+        <h2>Operator <b>{{ operator.name }}</b></h2>
+
+        <br>
+
+        <h4>Manager</h4>
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Login</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td scope="row">
+                {{ operator.manager.id }}
+              </td>
+              <td>
+                {{ operator.manager.login }}
+              </td>
+              <td align="right" width="1%" nowrap>
+                <a class="btn btn-dark" href="{{ url_for('operator_transfer', redir=url_for('operator_crew'), id=operator.manager.id) }}">Transfer Ownership</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>Crew</h4>
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Login</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for user in operator.employees %}
+            <tr>
+              <td scope="row">
+                {{ user.id }}
+              </td>
+              <td>
+                {{ user.login }}
+              </td>
+              <td align="right" width="1%" nowrap>
+                <a class="btn btn-danger" href="{{ url_for('operator_crew_fire', redir=url_for('operator_crew'), id=user.id) }}">Fire</a>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+
+        <h2>Add new crew</h2>
+
+        <span>
+          <form action="{{ url_for('operator_crew_add') }}" method="POST" class="g-3">
+            <select class="form-select" name="user_id">
+              <option selected>Select User</option>
+              {% for user in User.query.order_by(User.id).filter(User.admin == false).filter(User.operator == None).filter(User.employer == None) %}
+                <option value="{{ user.id }}">ID: {{ user.id }} - Login: {{ user.login }}</option>
+              {% endfor %}
+            </select>
+            <input type="hidden" name="redir" value="{{ url_for('operator_crew') }}">
+            <button type="submit" class="col-auto btn btn-primary">Add User</button>
+          </form>
+        </span>
+    </div>
+  </div>
+</div>
+{% endblock %}

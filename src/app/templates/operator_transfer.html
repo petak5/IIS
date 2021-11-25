@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <form method="post" action="{{ url_for('operator_transfer') }}" class="p-3">
+      <h4 class="py-3">Transfer ownership of operator <b>{{ user.operator.name }}</b></h4>
+      <div class="mb-3">
+        <label for="name" class="form-label">New manager</label>
+        <select class="form-select" name="user_id">
+          <option selected>Select User</option>
+          {% for user in User.query.order_by(User.id).filter(User.employer == user.operator) %}
+            <option value="{{ user.id }}">ID: {{ user.id }} - Login: {{ user.login }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-warning">Transfer</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
