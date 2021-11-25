@@ -1,6 +1,6 @@
 from app import app
 from app.models import db
-from app.models import User, StopProposal, Stop
+from app.models import User, StopProposal, Stop, Operator
 from flask import request, session, render_template, g, abort, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
@@ -88,27 +88,121 @@ def load_user():
 def admin_stops():
     return render_template('admin_stops.html', StopProposal=StopProposal, Stop=Stop)
 
-@app.route('/admin/stops/approve', methods=['POST'])
+@app.route('/admin/stops/add', methods=['POST'])
 @auth('admin')
-def admin_stops_approve():
-    stop_proposal_id = request.form["id"]
-    stop_proposal = StopProposal.query.get(stop_proposal_id)
-    if stop_proposal is None:
-        flash('Invalid request', 'danger')
-        return redirect(g.redir)
-    original_id = stop_proposal.original_id
-    name = stop_proposal.name
-    if original_id:
-        stop = Stop.query.get(original_id)
-        stop.name = name
-        db.session.delete(stop_proposal)
-    else:
-        stop = Stop(name)
-        db.session.add(stop)
-        db.session.delete(stop_proposal)
+def admin_stops_add():
+    name = request.form["name"]
+    stop = Stop(name)
+    db.session.add(stop)
     db.session.commit()
-    flash('Stop approved', 'success')
     return redirect(g.redir)
+
+@app.route('/admin/stops/modify', methods=['GET','POST'])
+@auth('admin')
+def admin_stops_modify():
+    if request.method == 'GET':
+        stop_id = request.args.get('id', type=int)
+        stop = Stop.query.get(stop_id)
+        if not stop:
+            flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('admin_stops_modify.html', stop=stop)
+    if request.method == 'POST':
+        stop_id = request.form.get("id", type=int)
+        stop = Stop.query.get(stop_id)
+        if not stop:
+            flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        name = request.form.get('name')
+        stop.name = name
+
+        db.session.add(stop)
+        try:
+            db.session.commit()
+            flash('Modification successful', 'success')
+        except:
+            flash('Unknown error', 'danger')
+        return redirect(g.redir)
+
+@app.route('/admin/stops/delete', methods=['GET','POST'])
+@auth('admin')
+def admin_stops_delete():
+    if request.method == 'GET':
+        stop_id = request.args.get('id', type=int)
+        stop = Stop.query.get(stop_id)
+        if not stop:
+            flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('admin_stops_delete.html', stop=stop)
+    if request.method == 'POST':
+        stop_id = request.form.get("id", type=int)
+        stop = Stop.query.get(stop_id)
+        if not stop:
+            flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+
+        db.session.delete(stop)
+        try:
+            db.session.commit()
+            flash('Stop successfully deleted', 'success')
+        except:
+            flash('Unknown error', 'danger')
+        return redirect(g.redir)
+
+@app.route('/admin/stops/proposal_approve', methods=['GET', 'POST'])
+@auth('admin')
+def admin_stops_proposal_approve():
+    if request.method == 'GET':
+        stop_proposal_id = request.args.get('id', type=int)
+        stop_proposal = StopProposal.query.get(stop_proposal_id)
+        if not stop_proposal:
+            flash('Stop proposal doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('admin_stops_proposal_approve.html', stopProposal=stop_proposal)
+    elif request.method == 'POST':
+        stop_proposal_id = request.form["id"]
+        stop_proposal = StopProposal.query.get(stop_proposal_id)
+        if stop_proposal is None:
+            flash('Invalid request', 'danger')
+            return redirect(g.redir)
+        original_id = stop_proposal.original_id
+        name = stop_proposal.name
+        if original_id:
+            stop = Stop.query.get(original_id)
+            # Empty name means it should be deleted
+            if name == "":
+                db.session.delete(stop)
+            else:
+                stop.name = name
+            db.session.delete(stop_proposal)
+        else:
+            stop = Stop(name)
+            db.session.add(stop)
+            db.session.delete(stop_proposal)
+        db.session.commit()
+        flash('Stop proposal approved', 'success')
+        return redirect(g.redir)
+
+@app.route('/admin/stops/proposal_decline', methods=['GET', 'POST'])
+@auth('admin')
+def admin_stops_proposal_decline():
+    if request.method == 'GET':
+        stop_proposal_id = request.args.get('id', type=int)
+        stop_proposal = StopProposal.query.get(stop_proposal_id)
+        if not stop_proposal:
+            flash('Stop proposal doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('admin_stops_proposal_decline.html', stopProposal=stop_proposal)
+    elif request.method == 'POST':
+        stop_proposal_id = request.form["id"]
+        stop_proposal = StopProposal.query.get(stop_proposal_id)
+        if stop_proposal is None:
+            flash('Invalid request', 'danger')
+            return redirect(g.redir)
+        db.session.delete(stop_proposal)
+        db.session.commit()
+        flash('Stop proposal declined', 'success')
+        return redirect(g.redir)
 
 @app.route('/admin/users')
 @auth('admin')
@@ -200,7 +294,7 @@ def admin_users_delete():
             flash('User doesn\'t exist', 'danger')
             return redirect(g.redir)
 
-        delete_crew =  True if request.args.get('delete_crew') == 'yes' else False
+        delete_crew = True if request.args.get('delete_crew') == 'yes' else False
 
         if user.is_operator():
             for employee in employees:
@@ -250,27 +344,96 @@ def admin_operators_add(): # TODO error handle
     flash('New operator successfuly added', 'success')
     return redirect(g.redir)
 
-@app.route('/operator/propose_stop', methods=['GET', 'POST'])
+@app.route('/operator/stops_deletion_proposal', methods=['GET', 'POST'])
 @auth('operator')
-def operator_propose_stop():
+def operator_stops_deletion_proposal():
     if request.method == 'GET':
-        return render_template('operator_propose_stop.html', Stop=Stop)
+        stop_id = request.args.get('id', type=int)
+        stop = Stop.query.get(stop_id)
+        if not stop:
+            flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_stops_deletion_proposal.html', stop=stop)
+    if request.method == 'POST':
+        stop_id = request.form["id"]
+        stop = Stop.query.get(stop_id)
+        if not stop:
+            flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        # Empty name means it should be deleted
+        sp = StopProposal("")
+        sp.original = stop
+        db.session.add(sp)
+        db.session.commit()
+        flash('Stop deletion proposal submitted for admin approval.', 'success')
+        return redirect(g.redir)
+
+@app.route('/operator/stops_modification_proposal', methods=['GET', 'POST'])
+@auth('operator')
+def operator_stops_modification_proposal():
+    if request.method == 'GET':
+        stop_id = request.args.get('id', type=int)
+        stop = Stop.query.get(stop_id)
+        if not stop:
+            flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_stops_modification_proposal.html', stop=stop)
     if request.method == 'POST':
         name = request.form["name"]
+        # Empty name is used to signalize deletion proposal, it is not a valid value
+        if name == '':
+            stop_id = request.form.get('id', type=int)
+            stop = Stop.query.get(stop_id)
+            if not stop:
+                flash('Stop doesn\'t exist', 'danger')
+                return redirect(g.redir)
+            flash('Proposed stop has to have a name.', 'danger')
+            return render_template('operator_stops_modification_proposal.html', stop=stop)
         sp = StopProposal(name)
-        original_id = request.form.get("original_id")
+        original_id = request.form.get("id")
         if original_id:
-            original = Stops.query.get(original_id)
+            original = Stop.query.get(original_id)
             if not original:
                 flash('Stop doesn\'t exist', 'danger')
                 return redirect(g.redir)
             sp.original = original
         db.session.add(sp)
         db.session.commit()
-        if original_id:
-            flash('Stop modification proposal submitted for admin approval.', 'success')
-        else:
-            flash('Stop creation proposal submitted for admin approval.', 'success')
+        flash('Stop modification proposal submitted for admin approval.', 'success')
+        return redirect(g.redir)
+
+@app.route('/operator/stops_proposal', methods=['GET', 'POST'])
+@auth('operator')
+def operator_stops_proposal():
+    if request.method == 'GET':
+        return render_template('operator_stops_proposal.html', Stop=Stop, StopProposal=StopProposal)
+    if request.method == 'POST':
+        name = request.form["name"]
+        if name == '' or name is None:
+            flash('Proposed stop has to have a name.', 'danger')
+            return redirect(g.redir)
+        sp = StopProposal(name)
+        db.session.add(sp)
+        db.session.commit()
+        flash('Stop creation proposal submitted for admin approval.', 'success')
+        return redirect(g.redir)
+
+@app.route('/operator/stops_proposal/delete', methods=['GET', 'POST'])
+@auth('operator')
+def operator_stops_proposal_delete():
+    if request.method == 'GET':
+        sp_id = request.args.get('id', type=int)
+        sp = StopProposal.query.get(sp_id)
+        if not sp:
+            flash('Stop proposal doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_stops_proposal_delete.html', stopProposal=sp)
+    if request.method == 'POST':
+        sp_id = request.form["id"]
+        sp = StopProposal.query.get(sp_id)
+        db.session.delete(sp)
+        db.session.commit()
+        flash('Stop proposal deleted.', 'success')
         return redirect(g.redir)
 
 @app.route('/operator/connections', methods=['GET', 'POST'])

@@ -1,14 +1,10 @@
 from flask import Flask
 from flask_migrate import Migrate
 from app.models import db
-import sys
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# Alternatively you can set environment variable "PYTHONPATH" to project root directory, eg. `export PYTHONPATH=./app`
-#sys.path.append(os.getcwd())
 
 HOST = os.environ.get('SERVER_HOST', 'localhost')
 try:

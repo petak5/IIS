@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <form method="post" action="{{ url_for('admin_stops_proposal_approve') }}" class="p-3 mx-auto">
+      <h4>Approve stop <b>{{ stopProposal.name }}</b></h4>
+      <input type="hidden" name="redir" value="{{ g.redir }}">
+      <input type="hidden" name="id" value="{{ stopProposal.id }}">
+      <button type="submit" class="btn btn-success">Approve Stop</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
