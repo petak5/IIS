@@ -62,10 +62,20 @@
               <option value="crew">Crew</option>
               <option value="user">User</option>
             </select>
-          <input type="text" class="form-control" name="login" placeholder="Login">
-          <input type="password" class="form-control" name="password" placeholder="Password">
-          <input type="hidden" name="redir" value="{{ url_for('admin_users') }}">
-              <button type="submit" class="col-auto btn btn-primary">Add User</button>
+            <input type="text" class="form-control" name="login" placeholder="Login">
+            <input type="password" class="form-control" name="password" placeholder="Password">
+            <input type="text" class="form-control" name="operator_name" placeholder="(Operator only) Operator Name">
+            <input class="form-control" list="datalistOptions" id="employerOperatorDataList" name="employer_id" placeholder="(Crew only) Employer">
+            <datalist id="datalistOptions">
+              {% for operator in Operator.query.all() %}
+              <option value="{{ operator.id }}">{{ operator.name }}</option>
+              {% endfor %}
+              <option value="101">Operator 1</option>
+              <option value="102">Operator 2</option>
+              <option value="103">Operator 3</option>
+            </datalist>
+            <input type="hidden" name="redir" value="{{ url_for('admin_users') }}">
+            <button type="submit" class="col-auto btn btn-primary">Add User</button>
           </form>
           <p> TODO role selector not working</p>
         </span>

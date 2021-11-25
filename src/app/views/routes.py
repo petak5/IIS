@@ -207,24 +207,27 @@ def admin_stops_proposal_decline():
 @app.route('/admin/users')
 @auth('admin')
 def admin_users():
-    return render_template('admin_users.html', User=User)
+    return render_template('admin_users.html', User=User, Operator=Operator)
 
 @app.route('/admin/users/add', methods=['POST'])
 @auth('admin')
 def admin_users_add():
     login = request.form["login"]
     password = request.form.get("password")
+    role = request.form.get('role')
+    operator_name = request.form.get('operator_name')
+    employer_id = request.form.get('employer_id')
     if password == '':
         password = None
     user = User(login, password)
-    user.admin = True if request.form.get("admin") == 'yes' else False
-
-    operator_id = request.form.get('operator_id')
-    if operator_id:
-        user.operator_id = operator_id
-    employer_id = request.form.get('operator_id')
-    if employer_id:
-        user.employer_id = employer_id
+    if role == "admin":
+        user.admin = True
+    elif role == "operator":
+        operator = Operator(operator_name)
+        user.operator = operator
+    elif role == "crew":
+        employer = Operator.query.get(employer_id)
+        user.employer = employer
     db.session.add(user)
     try:
         db.session.commit()
@@ -297,7 +300,7 @@ def admin_users_delete():
         delete_crew = True if request.args.get('delete_crew') == 'yes' else False
 
         if user.is_operator():
-            for employee in employees:
+            for employee in user.employees:
                 if delete_crew:
                     db.session.delete(employee)
                 else:
