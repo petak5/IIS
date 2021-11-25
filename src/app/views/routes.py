@@ -1,6 +1,6 @@
 from app import app
 from app.models import db
-from app.models import User, StopProposal, Stop, Operator
+from app.models import User, StopProposal, Stop, Operator, Vehicle
 from flask import request, session, render_template, g, abort, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
@@ -446,12 +446,46 @@ def operator_stops_proposal_delete():
 def operator_connections(): # TODO implement
     return render_template('placeholder.html')
 
-@app.route('/operator/vehicles', methods=['GET', 'POST'])
+@app.route('/operator/vehicles', methods=['GET'])
 @auth('operator')
-def operator_vehicles(): # TODO implement
-    return render_template('placeholder.html')
+def operator_vehicles():
+    if not g.operator:
+        return render_template('placeholder.html')
+    return render_template('operator_vehicles.html', operator=g.user.operator)
 
-@app.route('/operator/crew', methods=['GET', 'POST'])
+@app.route('/operator/vehicles/add', methods=['POST'])
+@auth('operator')
+def operator_vehicles_add():
+    seats = request.form.get("seats")
+    vehicle = Vehicle(g.operator)
+    vehicle.num_seats = seats
+    db.session.add(vehicle)
+    db.session.commit()
+    flash('New vehicle successfully added.', 'success')
+    return redirect(g.redir)
+
+@app.route('/operator/vehicle/remove', methods=['GET', 'POST'])
+@auth('operator')
+def operator_vehicles_remove():
+    if request.method == 'GET':
+        vehicle_id = request.args.get("id", type=int)
+        vehicle = Vehicle.query.get(vehicle_id)
+        if not vehicle:
+            flash('Vehicle doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_vehicles_remove.html', vehicle=vehicle)
+    elif request.method == 'POST':
+        vehicle_id = request.form.get("id", type=int)
+        vehicle = Vehicle.query.get(vehicle_id)
+        if not vehicle:
+            flash('Vehicle doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        db.session.delete(vehicle)
+        db.session.commit()
+        flash('Vehicle successfully removed.', 'success')
+        return redirect(g.redir)
+
+@app.route('/operator/crew', methods=['GET'])
 @auth('operator')
 def operator_crew():
     if not g.user.operator:

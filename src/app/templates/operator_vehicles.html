@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row p-3">
+      <div class="col">
+
+        <h2>Operator <b>{{ operator.name }}</b>'s vehicles</h2>
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Seats</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for vehicle in operator.vehicles %}
+            <tr>
+              <td scope="row">
+                {{ vehicle.id }}
+              </td>
+              <td>
+                {{ vehicle.num_seats }}
+              </td>
+              <td align="right" width="1%" nowrap>
+                <a class="btn btn-primary" href="{{ url_for('index', redir=url_for('operator_vehicles'), id=vehicle.id) }}">Connections</a>
+                <a class="btn btn-danger" href="{{ url_for('operator_vehicles_remove', redir=url_for('operator_vehicles'), id=vehicle.id) }}">Remove</a>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+
+        <h2>Add new vehicle</h2>
+
+        <span>
+          <form action="{{ url_for('operator_vehicles_add') }}" method="POST" class="g-3">
+            <input type="text" class="form-control" name="seats" placeholder="Seats">
+            <input type="hidden" name="redir" value="{{ url_for('operator_vehicles') }}">
+            <button type="submit" class="col-auto btn btn-primary">Add User</button>
+          </form>
+        </span>
+    </div>
+  </div>
+</div>
+{% endblock %}
