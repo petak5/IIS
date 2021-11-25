@@ -68,11 +68,8 @@
             <input class="form-control" list="datalistOptions" id="employerOperatorDataList" name="employer_id" placeholder="(Crew only) Employer">
             <datalist id="datalistOptions">
               {% for operator in Operator.query.all() %}
-              <option value="{{ operator.id }}">{{ operator.name }}</option>
+                <option value="{{ operator.id }}">{{ operator.name }}</option>
               {% endfor %}
-              <option value="101">Operator 1</option>
-              <option value="102">Operator 2</option>
-              <option value="103">Operator 3</option>
             </datalist>
             <input type="hidden" name="redir" value="{{ url_for('admin_users') }}">
             <button type="submit" class="col-auto btn btn-primary">Add User</button>

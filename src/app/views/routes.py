@@ -297,15 +297,17 @@ def admin_users_delete():
             flash('User doesn\'t exist', 'danger')
             return redirect(g.redir)
 
-        delete_crew = True if request.args.get('delete_crew') == 'yes' else False
+        delete_crew = True if request.form.get('delete_crew') == 'yes' else False
 
         if user.is_operator():
-            for employee in user.employees:
+            for employee in user.operator.employees:
                 if delete_crew:
                     db.session.delete(employee)
                 else:
                     employee.employer = None
                     db.session.add(employee)
+        if user.operator:
+            db.session.delete(user.operator)
         db.session.delete(user)
         try:
             db.session.commit()

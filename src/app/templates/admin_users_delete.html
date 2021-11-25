@@ -6,28 +6,29 @@
 {% block content %}
 <div class="container-fluid">
   <div class="row">
-<form method="post" action="{{ url_for('admin_users_delete') }}" class="p-3 mx-auto">
-    <h4>Deleting
+    <form method="post" action="{{ url_for('admin_users_delete') }}" class="p-3 mx-auto">
+      <h4>Deleting
         <b>{{ user.login }}</b>
         {% if user.is_admin() %}
-        <span class="badge bg-danger">Admin</span>
+          <span class="badge bg-danger">Admin</span>
         {% elif user.is_operator() %}
-        <span class="badge bg-warning">Operator</span> of {{ user.operator.name }}
+          <span class="badge bg-warning">Operator</span> of {{ user.operator.name }}
         {% elif user.is_crew() %}
-        <span class="badge bg-primary">Crew</span> of {{ user.employer.name }}
+          <span class="badge bg-primary">Crew</span> of {{ user.employer.name }}
         {% else %}
-        <span class="badge bg-secondary">User</span>
+          <span class="badge bg-secondary">User</span>
         {% endif %}
       </h4>
-    {% if user.operator != None %}
-  <div class="mb-3">
-    <input type="checkbox" class="form-check-input" name="delete_crew" value="yes" checked>
-    <label for="delete_crew" class="form-check-label">Delete accounts of operator's crew as well</label>
+      {% if user.operator != None %}
+        <div class="mb-3">
+          <input type="checkbox" class="form-check-input" name="delete_crew" value="yes" checked>
+          <label for="delete_crew" class="form-check-label">Delete accounts of operator's crew as well</label>
+        </div>
+      {% endif %}
+      <input type="hidden" name="redir" value="{{ g.redir }}">
+      <input type="hidden" name="id" value="{{ user.id }}">
+      <button type="submit" class="btn btn-danger">Delete User</button>
+    </form>
   </div>
-    {% endif %}
-  <input type="hidden" name="redir" value="{{ g.redir }}">
-  <input type="hidden" name="id" value="{{ user.id }}">
-  <button type="submit" class="btn btn-danger">Delete User</button>
-</form>
 </div>
 {% endblock %}
