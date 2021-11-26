@@ -456,8 +456,16 @@ def operator_vehicles():
 @app.route('/operator/vehicles/add', methods=['POST'])
 @auth('operator')
 def operator_vehicles_add():
-    seats = request.form.get("seats")
+    description = request.form.get("description")
+    if description == None:
+        description = ''
+    seats = request.form.get("seats", type=int)
+    if seats == None:
+        flash('You have to specify number of seats', 'danger')
+        return redirect(g.redir)
+
     vehicle = Vehicle(g.operator)
+    vehicle.description = description
     vehicle.num_seats = seats
     db.session.add(vehicle)
     db.session.commit()

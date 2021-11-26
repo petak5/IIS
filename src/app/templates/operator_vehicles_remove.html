@@ -7,7 +7,7 @@
 <div class="container-fluid">
   <div class="row">
     <form method="post" action="{{ url_for('operator_vehicles_remove') }}" class="p-3 mx-auto">
-      <h4>Removing vehicle with <b>{{ vehicle.num_seats }}</b> seats</h4>
+      <h4>Removing vehicle <b>{{ vehicle.description }}</b> with <b>{{ vehicle.num_seats }}</b> seats</h4>
       <input type="hidden" name="redir" value="{{ g.redir }}">
       <input type="hidden" name="id" value="{{ vehicle.id }}">
       <button type="submit" class="btn btn-danger">Remove</button>

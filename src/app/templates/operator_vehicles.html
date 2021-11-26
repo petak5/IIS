@@ -14,6 +14,7 @@
           <thead>
             <tr>
               <th scope="col">ID</th>
+              <th scope="col">Description</th>
               <th scope="col">Seats</th>
               <th scope="col"></th>
             </tr>
@@ -23,6 +24,9 @@
             <tr>
               <td scope="row">
                 {{ vehicle.id }}
+              </td>
+              <td>
+                {{ vehicle.description }}
               </td>
               <td>
                 {{ vehicle.num_seats }}
@@ -40,9 +44,10 @@
 
         <span>
           <form action="{{ url_for('operator_vehicles_add') }}" method="POST" class="g-3">
-            <input type="text" class="form-control" name="seats" placeholder="Seats">
+            <input type="text" class="form-control" name="description" placeholder="Description">
+            <input type="number" class="form-control" name="seats" placeholder="Seats" required>
             <input type="hidden" name="redir" value="{{ url_for('operator_vehicles') }}">
-            <button type="submit" class="col-auto btn btn-primary">Add User</button>
+            <button type="submit" class="col-auto btn btn-primary">Add Vehicle</button>
           </form>
         </span>
     </div>
