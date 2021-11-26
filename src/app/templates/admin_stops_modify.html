@@ -10,7 +10,7 @@
       <h4 class="py-3">Modifying stop <b>{{ stop.name }}</b></h4>
       <div class="mb-3">
         <label for="name" class="form-label">New name</label>
-        <input style="max-width: 30em" type="text" class="form-control" name="name" value="{{ stop.name }}">
+        <input style="max-width: 30em" type="text" class="form-control" name="name" value="{{ stop.name }}" required>
       </div>
       <input type="hidden" name="redir" value="{{ g.redir }}">
       <input type="hidden" name="id" value="{{ stop.id }}">

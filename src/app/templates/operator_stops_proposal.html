@@ -83,7 +83,7 @@
 
         <span>
           <form action="{{ url_for('operator_stops_proposal') }}" method="POST" class="g-3">
-            <input type="text" class="form-control" name="name" placeholder="Name">
+            <input type="text" class="form-control" name="name" placeholder="Name" required>
             <input type="hidden" name="redir" value="{{ url_for('operator_stops_proposal') }}">
             <button type="submit" class="col-auto btn btn-primary">Propose New Stop</button>
          </form>
