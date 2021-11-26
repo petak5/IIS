@@ -1,6 +1,6 @@
 from app import app
 from app.models import db
-from app.models import User, StopProposal, Stop, Operator, Vehicle
+from app.models import User, StopProposal, Stop, Operator, Vehicle, Line
 from flask import request, session, render_template, g, abort, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
@@ -420,15 +420,71 @@ def operator_stops_proposal_delete():
         flash('Stop proposal deleted.', 'success')
         return redirect(g.redir)
 
-@app.route('/operator/connections', methods=['GET', 'POST'])
+@app.route('/operator/connections', methods=['GET'])
 @auth('operator')
-def operator_connections(): # TODO implement
-    return render_template('placeholder.html')
+def operator_connections():
+    if not g.operator:
+        flash('Only operator can view this page', 'danger')
+        return render_template('placeholder.html')
+    return render_template('operator_connections.html', operator=g.operator)
+
+@app.route('/operator/lines', methods=['GET'])
+@auth('operator')
+def operator_lines():
+    if not g.operator:
+        flash('Only operator can view this page', 'danger')
+        return render_template('placeholder.html')
+    return render_template('operator_lines.html', operator=g.operator)
+
+@app.route('/operator/lines/add', methods=['POST'])
+@auth('operator')
+def operator_lines_add():
+    line_name = request.form.get("name")
+    line = Line(line_name, g.operator)
+    db.session.add(line)
+    db.session.commit()
+    flash('New line successfully added.', 'success')
+    return redirect(g.redir)
+
+@app.route('/operator/lines/delete', methods=['GET', 'POST'])
+@auth('operator')
+def operator_lines_delete():
+    if request.method == 'GET':
+        line_id = request.args.get("id", type=int)
+        line = Line.query.get(line_id)
+        if not line:
+            flash('Line doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_lines_delete.html', line=line)
+    elif request.method == 'POST':
+        line_id = request.form.get("id", type=int)
+        line = Line.query.get(line_id)
+        if not line:
+            flash('Line doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        db.session.delete(line)
+        db.session.commit()
+        flash('Line successfully removed.', 'success')
+        return redirect(g.redir)
+
+@app.route('/operator/lines/detail', methods=['GET'])
+@auth('operator')
+def operator_lines_detail():
+    if not g.operator:
+        flash('Only operator can view this page', 'danger')
+        return render_template('placeholder.html')
+    line_id = request.args.get("id", type=int)
+    line = Line.query.get(line_id)
+    if not line:
+        flash('Line doesn\'t exist', 'danger')
+        return redirect(g.redir)
+    return render_template('operator_lines_detail.html', line=line)
 
 @app.route('/operator/vehicles', methods=['GET'])
 @auth('operator')
 def operator_vehicles():
     if not g.operator:
+        flash('Only operator can view this page', 'danger')
         return render_template('placeholder.html')
     return render_template('operator_vehicles.html', operator=g.user.operator)
 
@@ -442,7 +498,6 @@ def operator_vehicles_add():
     if seats == None:
         flash('You have to specify number of seats', 'danger')
         return redirect(g.redir)
-
     vehicle = Vehicle(g.operator)
     vehicle.description = description
     vehicle.num_seats = seats
@@ -476,6 +531,7 @@ def operator_vehicles_remove():
 @auth('operator')
 def operator_crew():
     if not g.user.operator:
+        flash('Only operator can view this page', 'danger')
         return render_template('placeholder.html')
     return render_template('operator_crew.html', User=User, operator=g.user.operator)
 

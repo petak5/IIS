@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row p-3">
+      <div class="col">
+
+        <h2>Operator <b>{{ operator.name }}</b>'s lines</h2>
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Name</th>
+              <th scope="col">From Stop</th>
+              <th scope="col">To Stop</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for line in operator.lines %}
+            <tr>
+              <td scope="row">
+                {{ line.id }}
+              </td>
+              <td>
+                {{ line.name }}
+              </td>
+              <td>
+                Not Implemented
+              </td>
+              <td>
+                Not Implemented
+              </td>
+              <td align="right" width="1%" nowrap>
+                <a class="btn btn-primary" href="{{ url_for('operator_lines_detail', redir=url_for('operator_lines'), id=line.id) }}">Detail</a>
+                <a class="btn btn-danger" href="{{ url_for('operator_lines_delete', redir=url_for('operator_lines'), id=line.id) }}">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+
+        <h2>Add new line</h2>
+
+        <span>
+          <form action="{{ url_for('operator_lines_add') }}" method="POST" class="g-3">
+            <input type="text" class="form-control" name="name" placeholder="Name">
+            <input type="hidden" name="redir" value="{{ url_for('operator_lines') }}">
+            <button type="submit" class="col-auto btn btn-primary">Add Line</button>
+          </form>
+        </span>
+    </div>
+  </div>
+</div>
+{% endblock %}

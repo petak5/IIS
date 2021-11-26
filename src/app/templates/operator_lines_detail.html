@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row p-3">
+      <div class="col">
+
+        <h2>Stops of line <b>{{ line.name }}</b> of operator <b>{{ line.operator.name }}</b></h2>
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Name</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for stop in line.stops %}
+            <tr>
+              <td scope="row">
+                {{ stop.id }}
+              </td>
+              <td>
+                {{ stop.name }}
+              </td>
+              <td align="right" width="1%" nowrap>
+                <a class="btn btn-primary" href="{{ url_for('index', redir=url_for('operator_lines'), id=stop.id) }}">Modify</a>
+                <a class="btn btn-danger" href="{{ url_for('operator_lines_delete', redir=url_for('operator_lines'), id=stop.id) }}">Remove</a>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+
+        <h2>Add stop</h2>
+
+        <span>
+          <form action="{{ url_for('operator_lines_add') }}" method="POST" class="g-3">
+            <input type="text" class="form-control" name="stop" placeholder="Stop">
+            <input type="text" class="form-control" name="datetime" placeholder="Time delta">
+            <input type="hidden" name="redir" value="{{ url_for('operator_lines') }}">
+            <button type="submit" class="col-auto btn btn-primary">Add Stop</button>
+          </form>
+        </span>
+    </div>
+  </div>
+</div>
+{% endblock %}
