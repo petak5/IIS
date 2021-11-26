@@ -57,7 +57,8 @@
                 {{ user.login }}
               </td>
               <td align="right" width="1%" nowrap>
-                <a class="btn btn-danger" href="{{ url_for('operator_crew_fire', redir=url_for('operator_crew'), id=user.id) }}">Fire</a>
+                <a class="btn btn-warning" href="{{ url_for('operator_crew_fire', redir=url_for('operator_crew'), id=user.id) }}">Fire</a>
+                <a class="btn btn-danger" href="{{ url_for('operator_crew_delete', redir=url_for('operator_crew'), id=user.id) }}">Delete</a>
               </td>
             </tr>
           {% endfor %}
@@ -68,12 +69,8 @@
 
         <span>
           <form action="{{ url_for('operator_crew_add') }}" method="POST" class="g-3">
-            <select class="form-select" name="user_id">
-              <option selected>Select User</option>
-              {% for user in User.query.order_by(User.id).filter(User.admin == false).filter(User.operator == None).filter(User.employer == None) %}
-                <option value="{{ user.id }}">ID: {{ user.id }} - Login: {{ user.login }}</option>
-              {% endfor %}
-            </select>
+            <input type="text" class="form-control" name="login" placeholder="Login" required>
+            <input type="password" class="form-control" name="password" placeholder="Password" required>
             <input type="hidden" name="redir" value="{{ url_for('operator_crew') }}">
             <button type="submit" class="col-auto btn btn-primary">Add User</button>
           </form>

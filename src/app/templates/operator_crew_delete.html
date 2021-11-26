@@ -6,12 +6,11 @@
 {% block content %}
 <div class="container-fluid">
   <div class="row">
-    <form method="post" action="{{ url_for('operator_crew_fire') }}" class="p-3 mx-auto">
-      <h4>Are you sure you want to fire <b>{{ user.login }}</b></h4>
-      <p>This will convert their account into a regular user</p>
+    <form method="post" action="{{ url_for('operator_crew_delete') }}" class="p-3 mx-auto">
+      <h4>Are you sure you want to delete <b>{{ user.login }}</b></h4>
       <input type="hidden" name="redir" value="{{ g.redir }}">
       <input type="hidden" name="id" value="{{ user.id }}">
-      <button type="submit" class="btn btn-danger">Fire</button>
+      <button type="submit" class="btn btn-danger">Delete</button>
     </form>
   </div>
 </div>

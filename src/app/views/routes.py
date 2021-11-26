@@ -300,11 +300,6 @@ def admin_users_delete():
             flash('Unknown error', 'danger')
         return redirect(g.redir)
 
-@app.route('/admin/operators')
-@auth('admin')
-def admin_operators():
-    return render_template('admin_operators.html', User=User)
-
 @app.route('/admin/operators/pick', methods=['GET', 'POST'])
 @auth('admin')
 def admin_operators_pick():
@@ -487,14 +482,22 @@ def operator_crew():
 @app.route('/operator/crew/add', methods=['POST'])
 @auth('operator')
 def operator_crew_add():
-    user_id = request.form.get("user_id", type=int)
-    user = User.query.get(user_id)
-    if not user:
-        flash('User doesn\'t exist', 'danger')
-        return redirect(g.redir)
+    login = request.form["login"]
+    password = request.form['password']
+    employer_id = g.operator.id
+    if password == '':
+        password = None
+    user = User(login, password)
     user.employer = g.operator
-    db.session.commit()
-    flash('New crew successfully added.', 'success')
+    db.session.add(user)
+    try:
+        db.session.commit()
+        flash(f'Crew {login} successfully added.', 'success')
+        return redirect(g.redir)
+    except IntegrityError:
+        flash(f'Crew {login} already exists.', 'danger')
+        return redirect(g.redir)
+    flash('Unknown error', 'danger')
     return redirect(g.redir)
 
 @app.route('/operator/crew/fire', methods=['GET', 'POST'])
@@ -516,6 +519,27 @@ def operator_crew_fire():
         user.employer = None
         db.session.commit()
         flash('User successfully fired.', 'success')
+        return redirect(g.redir)
+
+@app.route('/operator/crew/delete', methods=['GET', 'POST'])
+@auth('operator')
+def operator_crew_delete():
+    if request.method == 'GET':
+        user_id = request.args.get("id", type=int)
+        user = User.query.get(user_id)
+        if not user:
+            flash('User doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_crew_delete.html', user=user)
+    elif request.method == 'POST':
+        user_id = request.form.get("id", type=int)
+        user = User.query.get(user_id)
+        if not user:
+            flash('User doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        db.session.delete(user)
+        db.session.commit()
+        flash('User successfully deleted.', 'success')
         return redirect(g.redir)
 
 @app.route('/operator/transfer', methods=['GET', 'POST'])
