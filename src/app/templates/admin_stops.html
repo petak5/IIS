@@ -74,8 +74,12 @@
             {{ stopProposal.original_id }}
           </td>
           <td align="right" width="1%" nowrap>
-            <a class="btn btn-success" href="{{ url_for('admin_stops_proposal_approve', redir=url_for('admin_stops'), id=stopProposal.id) }}">Approve</a>
-            <a class="btn btn-danger" href="{{ url_for('admin_stops_proposal_decline', redir=url_for('admin_stops'), id=stopProposal.id) }}">Decline</a>
+            <form method="post" action="{{ url_for('admin_stops_proposal_approve') }}" class="form-inline" nowrap>
+              <input type="hidden" name="redir" value="{{ url_for('admin_stops') }}">
+              <input type="hidden" name="id" value="{{ stopProposal.id }}">
+              <button type="submit" formaction="{{ url_for('admin_stops_proposal_approve') }}" class="btn btn-success">Approve</button>
+              <button type="submit" formaction="{{ url_for('admin_stops_proposal_decline') }}" class="btn btn-danger">Decline</button>
+            </form>
           </td>
         </tr>
         {% endfor %}
