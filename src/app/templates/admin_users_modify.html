@@ -33,10 +33,12 @@
     <input type="checkbox" class="form-check-input" name="disable_login" value="yes" {{ 'checked' if user.password == None else '' }}>
     <label for="delete_crew" class="form-check-label">Disable login (removes password)</label>
   </div>
+  {% if user.is_admin() or ( not user.is_operator() and not user.is_crew() ) %}
   <div class="mb-3">
     <input type="checkbox" class="form-check-input" name="admin" value="yes" {{ 'checked' if user.admin else '' }}>
     <label for="delete_crew" class="form-check-label">Grant admin privileges</label>
   </div>
+  {% endif %}
   <input type="hidden" name="redir" value="{{ g.redir }}">
   <input type="hidden" name="id" value="{{ user.id }}">
   <button type="submit" class="btn btn-warning">Modify User</button>
