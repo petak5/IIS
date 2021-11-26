@@ -59,20 +59,49 @@
         <h2>Add new user</h2>
 
         <span>
+          <script type="text/javascript">
+            $( document ).ready(function(){
+            $("#operator_name").hide();
+            $("#operator_name").prop('required', false);
+            $("#employer_id").hide();
+            $("#employer_id").prop('required', false);
+            if ($('#role').val() == 'operator'){
+                $("#operator_name").show();
+                $("#operator_name").prop('required', true);
+            }else if ($('#role').val() == 'crew'){
+                $("#employer_id").show();
+                $("#employer_id").prop('required', true);
+            }
+
+            $('#role').on('change', function() {
+              $("#operator_name").hide();
+              $("#operator_name").prop('required', false);
+              $("#employer_id").hide();
+              $("#employer_id").prop('required', false);
+              if (this.value == 'operator'){
+                $("#operator_name").show();
+                $("#operator_name").prop('required', true);
+              }else if (this.value == 'crew'){
+                $("#employer_id").show();
+                $("#employer_id").prop('required', true);
+              }
+            })
+            });
+          </script>
           <form action="{{ url_for('admin_users_add') }}" method="POST" class="g-3">
             <label for="role" class="form-label">Role: </label>
-            <select class="form-select" name="role">
-              <option selected>Select Role</option>
+            <select class="form-select" id="role" name="role" required>
+              <option value="" selected>Select Role</option>
               <option value="admin">Admin</option>
               <option value="operator">Operator</option>
               <option value="crew">Crew</option>
               <option value="user">User</option>
             </select>
-            <input type="text" class="form-control" name="login" placeholder="Login">
-            <input type="password" class="form-control" name="password" placeholder="Password">
-            <input type="text" class="form-control" name="operator_name" placeholder="(Operator only) Operator Name">
-            <select class="form-select" name="employer_id">
-              <option selected>Select Employer</option>
+            <input type="text" class="form-control" name="login" placeholder="Login" required>
+            <input type="password" class="form-control" name="password" placeholder="Password" required>
+            <input type="text" class="form-control" id="operator_name" name="operator_name" placeholder="Operator Name">
+            <select class="form-select" id="employer_id" name="employer_id">
+              <option value="" selected>Select Employer</option>
               {% for operator in Operator.query.order_by(Operator.name) %}
                 <option value="{{ operator.id }}">{{ operator.name }}</option>
               {% endfor %}

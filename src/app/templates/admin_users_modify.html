@@ -27,7 +27,7 @@
   <div class="mb-3">
     <label for="password" class="form-label">New password</label>
     <input style="max-width: 30em" type="password" class="form-control" name="password">
-    <div id="emailHelp" class="form-text">Leave empty to keep the original.</div>
+    <div class="form-text">Leave empty to keep the original.</div>
   </div>
   <div class="mb-3">
     <input type="checkbox" class="form-check-input" name="disable_login" value="yes" {{ 'checked' if user.password == None else '' }}>
