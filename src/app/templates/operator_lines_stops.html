@@ -13,11 +13,10 @@
         <table class="table table-hover">
           <thead>
             <tr>
-              <th scope="col">ID</th>
               <th scope="col">Position</th>
               <th scope="col">Stop ID</th>
               <th scope="col">Stop Name</th>
-              <th scope="col">Distance in minutes</th>
+              <th scope="col">Distance from previous in minutes</th>
               <th scope="col"></th>
             </tr>
           </thead>
@@ -25,10 +24,7 @@
           {% for lineStop in line.stops %}
             <tr>
               <td scope="row">
-                {{ lineStop.id }}
-              </td>
-              <td scope="row">
-                Not Implemented
+                {{ lineStop.position }}
               </td>
               <td scope="row">
                 {{ lineStop.stop.id }}
@@ -58,7 +54,9 @@
                 <option value="{{ stop.id }}">{{ stop.name }}</option>
               {% endfor %}
             </select>
-            <input type="number" class="form-control" name="time_delta" placeholder="Distance in minutes" required>
+            {% if line.stops|count > 0 %}
+              <input type="number" class="form-control" name="time_delta" placeholder="Distance from previous in minutes" required>
+            {% endif %}
             <input type="hidden" name="line_id" value="{{ line.id }}">
             <input type="hidden" name="redir" value="{{ url_for('operator_lines_stops', line_id=line.id) }}">
             <button type="submit" class="col-auto btn btn-primary">Add Stop</button>

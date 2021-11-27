@@ -73,7 +73,14 @@ class LineStop(Base):
     stop = db.relationship("Stop", back_populates="lines")
     line_id = db.Column(db.Integer, db.ForeignKey('line.id'), nullable=False)
     line = db.relationship("Line", back_populates="stops")
+    position = db.Column(db.Integer, nullable=False)
     time_delta = db.Column(db.Integer, default=0)
+
+    # TODO: Test if this actually works
+    db.UniqueConstraint('position')
+
+    def __init__(self, position):
+        self.position = position
 
 class Connection(Base):
     start_time = db.Column(db.DateTime, nullable=False)
