@@ -14,7 +14,9 @@
           <thead>
             <tr>
               <th scope="col">ID</th>
-              <th scope="col">Name</th>
+              <th scope="col">Position</th>
+              <th scope="col">Stop ID</th>
+              <th scope="col">Stop Name</th>
               <th scope="col">Distance in minutes</th>
               <th scope="col"></th>
             </tr>
@@ -22,6 +24,12 @@
           <tbody>
           {% for lineStop in line.stops %}
             <tr>
+              <td scope="row">
+                {{ lineStop.id }}
+              </td>
+              <td scope="row">
+                Not Implemented
+              </td>
               <td scope="row">
                 {{ lineStop.stop.id }}
               </td>

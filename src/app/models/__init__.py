@@ -68,10 +68,10 @@ class Line(Base):
         self.name = name
         self.operator = operator
 
-class LineStop(db.Model):
-    stop_id = db.Column(db.Integer, db.ForeignKey('stop.id'), primary_key=True)
+class LineStop(Base):
+    stop_id = db.Column(db.Integer, db.ForeignKey('stop.id'), nullable=False)
     stop = db.relationship("Stop", back_populates="lines")
-    line_id = db.Column(db.Integer, db.ForeignKey('line.id'), primary_key=True)
+    line_id = db.Column(db.Integer, db.ForeignKey('line.id'), nullable=False)
     line = db.relationship("Line", back_populates="stops")
     time_delta = db.Column(db.Integer, default=0)
 

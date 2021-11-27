@@ -495,7 +495,7 @@ def operator_lines_stops():
         if not stop:
             flash('Stop doesn\'t exist', 'danger')
             return redirect(g.redir)
-        if not time_delta:
+        if time_delta is None:
             flash('You have to specify time delta', 'danger')
             return redirect(g.redir)
         ls = LineStop()
