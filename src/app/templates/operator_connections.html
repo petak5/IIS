@@ -16,42 +16,82 @@
               <th scope="col">ID</th>
               <th scope="col">Line ID</th>
               <th scope="col">Line Name</th>
+              <th scope="col">From Stop</th>
+              <th scope="col">To Stop</th>
+              <th scope="col">Vehicle ID</th>
+              <th scope="col">Vehicle Description</th>
+              <th scope="col">Departure</th>
               <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
-          {% for connection in operator.connections %}
-            <tr>
-              <td scope="row">
-                {{ connection.id }}
-              </td>
-              <td>
-                {{ connection.line.id }}
-              </td>
-              <td>
-                {{ connection.line.name }}
-              </td>
-              <td align="right" width="1%" nowrap>
-                <a class="btn btn-primary" href="{{ url_for('index', redir=url_for('operator_connections'), id=connection.id) }}">Detail</a>
-                <a class="btn btn-danger" href="{{ url_for('operator_vehicles_remove', redir=url_for('operator_connections'), id=connection.id) }}">Delete</a>
-              </td>
-            </tr>
+          {% for line in operator.lines %}
+            {% for connection in line.connections %}
+              <tr>
+                <td scope="row">
+                  {{ connection.id }}
+                </td>
+                <td>
+                  {{ connection.line.id }}
+                </td>
+                <td>
+                  {{ connection.line.name }}
+                </td>
+                <td>
+                  {% if connection.line.stops|count > 0 %}
+                    {{ connection.line.stops[0].stop.name }}
+                  {% else %}
+                    None
+                  {% endif %}
+                </td>
+                <td>
+                  {% if connection.line.stops|count > 0 %}
+                    {{ connection.line.stops[connection.line.stops|count - 1].stop.name }}
+                  {% else %}
+                    None
+                  {% endif %}
+                </td>
+                <td>
+                  {{ connection.vehicle.id }}
+                </td>
+                <td>
+                  {{ connection.vehicle.description }}
+                </td>
+                <td>
+                  {{ connection.start_time }}
+                </td>
+                <td align="right" width="1%" nowrap>
+                  <a class="btn btn-primary" href="{{ url_for('index', redir=url_for('operator_connections'), id=connection.id) }}">Detail</a>
+                  <a class="btn btn-danger" href="{{ url_for('operator_vehicles_remove', redir=url_for('operator_connections'), id=connection.id) }}">Delete</a>
+                </td>
+              </tr>
+            {% endfor %}
           {% endfor %}
           </tbody>
         </table>
 
-        <p><b>TODO:</b> implement</p>
-
-        <!--<h2>Add new connection</h2>
+        <h2>Add new connection</h2>
 
         <span>
-          <form action="{{ url_for('operator_vehicles_add') }}" method="POST" class="g-3">
-            <input type="text" class="form-control" name="name" placeholder="Name">
-            <input type="number" class="form-control" name="seats" placeholder="Seats" required>
+          <form action="{{ url_for('operator_connections_add') }}" method="POST" class="g-3">
+            <select class="form-select" id="line" name="line" required>
+              <option value="" selected>Select Line</option>
+              {% for line in operator.lines %}
+                <option value="{{ line.id }}">{{ line.name }}</option>
+              {% endfor %}
+            </select>
+            <input type="date" class="form-control" name="date" placeholder="Departure Date" required>
+            <input type="time" class="form-control" name="time" placeholder="Departure Time" required>
+            <select class="form-select" id="vehicle" name="vehicle" required>
+              <option value="" selected>Select Vehicle</option>
+              {% for vehicle in operator.vehicles %}
+                <option value="{{ vehicle.id }}">{{ vehicle.description }} - {{ vehicle.num_seats }} seats</option>
+              {% endfor %}
+            </select>
             <input type="hidden" name="redir" value="{{ url_for('operator_connections') }}">
             <button type="submit" class="col-auto btn btn-primary">Add Connection</button>
           </form>
-        </span>-->
+        </span>
     </div>
   </div>
 </div>

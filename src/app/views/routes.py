@@ -1,9 +1,10 @@
 from app import app
 from app.models import db
-from app.models import User, StopProposal, Stop, Operator, Vehicle, Line, LineStop
+from app.models import User, StopProposal, Stop, Operator, Vehicle, Line, LineStop, Connection
 from flask import request, session, render_template, g, abort, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
+from datetime import datetime
 
 def login_user(login, password):
     user = User.query.filter_by(login=login).first()
@@ -427,6 +428,26 @@ def operator_connections():
         flash('Only operator can view this page', 'danger')
         return render_template('placeholder.html')
     return render_template('operator_connections.html', operator=g.operator)
+
+@app.route('/operator/connections/add', methods=['POST'])
+@auth('operator')
+def operator_connections_add():
+    line_id = request.form.get("line", type=int)
+    line = Line.query.get(line_id)
+    departure_date = request.form.get("date")
+    departure_time = request.form.get("time")
+    date = datetime.strptime(departure_date, "%Y-%m-%d")
+    time = datetime.strptime(departure_time, "%H:%M")
+    dt = datetime.combine(date, time.time())
+    vehicle_id = request.form.get("vehicle", type=int)
+    vehicle = Vehicle.query.get(vehicle_id)
+    connection = Connection(dt)
+    connection.line = line
+    connection.vehicle = vehicle
+    db.session.add(connection)
+    db.session.commit()
+    flash('New connection successfully added.', 'success')
+    return redirect(g.redir)
 
 @app.route('/operator/lines', methods=['GET'])
 @auth('operator')
