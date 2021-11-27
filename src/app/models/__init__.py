@@ -39,20 +39,6 @@ class User(Base):
     def is_crew(self):
         return self.employer_id is not None
 
-class LineStop(Base):
-    stop_id = db.Column(db.Integer, db.ForeignKey('stop.id'), primary_key=True)
-    stop = db.relationship("Stop", back_populates="lines")
-    line_id = db.Column(db.Integer, db.ForeignKey('line.id'), primary_key=True)
-    line = db.relationship("Line", back_populates="stops")
-    date_time = db.Column(db.DateTime)
-
-class Stop(Base):
-    name = db.Column(db.String(128), nullable=False)
-    lines = db.relationship(LineStop, back_populates="stop")
-
-    def __init__(self, name):
-        self.name = name
-
 # operator creates a proposal to create/modify a Stop
 # which is then approved by an admin
 class StopProposal(Base):
@@ -65,15 +51,29 @@ class StopProposal(Base):
         self.original = original
         self.name = name
 
+class Stop(Base):
+    name = db.Column(db.String(128), nullable=False)
+    lines = db.relationship("LineStop", back_populates="stop")
+
+    def __init__(self, name):
+        self.name = name
+
 class Line(Base):
     name = db.Column(db.String(128), nullable=False)
     operator_id = db.Column(db.Integer, db.ForeignKey('operator.id'), nullable=False)
     operator = db.relationship("Operator", backref="lines")
-    stops = db.relationship(LineStop, back_populates="line")
+    stops = db.relationship("LineStop", back_populates="line")
 
     def __init__(self, name, operator):
         self.name = name
         self.operator = operator
+
+class LineStop(db.Model):
+    stop_id = db.Column(db.Integer, db.ForeignKey('stop.id'), primary_key=True)
+    stop = db.relationship("Stop", back_populates="lines")
+    line_id = db.Column(db.Integer, db.ForeignKey('line.id'), primary_key=True)
+    line = db.relationship("Line", back_populates="stops")
+    time_delta = db.Column(db.Integer, default=0)
 
 class Connection(Base):
     start_time = db.Column(db.DateTime, nullable=False)

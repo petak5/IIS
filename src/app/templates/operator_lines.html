@@ -36,7 +36,7 @@
                 Not Implemented
               </td>
               <td align="right" width="1%" nowrap>
-                <a class="btn btn-primary" href="{{ url_for('operator_lines_detail', redir=url_for('operator_lines'), id=line.id) }}">Detail</a>
+                <a class="btn btn-primary" href="{{ url_for('operator_lines_stops', line_id=line.id) }}">Stops</a>
                 <a class="btn btn-danger" href="{{ url_for('operator_lines_delete', redir=url_for('operator_lines'), id=line.id) }}">Delete</a>
               </td>
             </tr>

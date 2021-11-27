@@ -1,6 +1,6 @@
 from app import app
 from app.models import db
-from app.models import User, StopProposal, Stop, Operator, Vehicle, Line
+from app.models import User, StopProposal, Stop, Operator, Vehicle, Line, LineStop
 from flask import request, session, render_template, g, abort, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
@@ -467,18 +467,45 @@ def operator_lines_delete():
         flash('Line successfully removed.', 'success')
         return redirect(g.redir)
 
-@app.route('/operator/lines/detail', methods=['GET'])
+@app.route('/operator/lines/stops', methods=['GET', 'POST'])
 @auth('operator')
-def operator_lines_detail():
+def operator_lines_stops():
     if not g.operator:
         flash('Only operator can view this page', 'danger')
         return render_template('placeholder.html')
-    line_id = request.args.get("id", type=int)
-    line = Line.query.get(line_id)
-    if not line:
-        flash('Line doesn\'t exist', 'danger')
+    if request.method == 'GET':
+        line_id = request.args.get("line_id", type=int)
+        line = Line.query.get(line_id)
+        if not line:
+            flash('Line doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_lines_stops.html', Stop=Stop, line=line)
+    elif request.method == 'POST':
+        line_id = request.form.get("line_id", type=int)
+        stop_id = request.form.get("stop", type=int)
+        time_delta = request.form.get("time_delta", type=int)
+        if not line_id:
+            flash('Line ID doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        line = Line.query.get(line_id)
+        if not line:
+            flash('Line doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        stop = Stop.query.get(stop_id)
+        if not stop:
+            flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        if not time_delta:
+            flash('You have to specify time delta', 'danger')
+            return redirect(g.redir)
+        ls = LineStop()
+        ls.line = line
+        ls.stop = stop
+        ls.time_delta = time_delta
+        db.session.add(ls)
+        db.session.commit()
+        flash('New stop successfully added.', 'success')
         return redirect(g.redir)
-    return render_template('operator_lines_detail.html', line=line)
 
 @app.route('/operator/vehicles', methods=['GET'])
 @auth('operator')
@@ -492,10 +519,10 @@ def operator_vehicles():
 @auth('operator')
 def operator_vehicles_add():
     description = request.form.get("description")
-    if description == None:
+    if not description:
         description = ''
     seats = request.form.get("seats", type=int)
-    if seats == None:
+    if not seats:
         flash('You have to specify number of seats', 'danger')
         return redirect(g.redir)
     vehicle = Vehicle(g.operator)
@@ -696,7 +723,7 @@ def register():
         db.session.add(user)
         try:
             db.session.commit()
-            flash(f"Succesfully registered as {user.login}, you may now login.", 'success')
+            flash(f"Successfully registered as {user.login}, you may now login.", 'success')
             return redirect(url_for('login'))
         except IntegrityError:
             flash(f"Login {user.login} is already taken.", 'danger')
