@@ -4,7 +4,7 @@ from app.models import User, StopProposal, Stop, Operator, Vehicle, Line, LineSt
 from flask import request, session, render_template, g, abort, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def login_user(login, password):
     user = User.query.filter_by(login=login).first()
@@ -690,7 +690,56 @@ def user_position(): # TODO implement
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', Stop=Stop)
+
+@app.route('/search')
+def search():
+    results = []
+    from_ = request.args.get('from')
+    to = request.args.get('to')
+    dt = request.args.get('dt', type=int) # show only connections leaving later than this
+    if dt:
+        dt = datetime.fromtimestamp(dt)
+    else:
+        dt = datetime.now()
+
+    from_ = Stop.query.filter_by(name=from_).first()
+    to = Stop.query.filter_by(name=to).first()
+    # TODO fuzzy match
+    if not from_:
+        flash(f'No such stop <b>{from_}</b>', 'danger')
+        return redirect(g.redir)
+    if not to:
+        flash(f'No such stop <b>{to}</b>', 'danger')
+        return redirect(g.redir)
+    # TODO error check
+    for from_ls in from_.lines:
+        pos = from_ls.position
+        line = from_ls.line
+        stops = LineStop.query.filter_by(line=line).order_by(LineStop.position)
+        to_ls = stops.filter(LineStop.position > pos).filter_by(stop=to).first()
+        if not to_ls:
+            continue
+        operator = line.operator
+        start_delta = timedelta(minutes=sum(ls.time_delta for ls in stops.filter(LineStop.position <= pos)))
+        duration = timedelta(minutes=sum(ls.time_delta for ls in stops.filter(LineStop.position > pos).filter(LineStop.position <= to_ls.position)))
+        end_delta = start_delta+duration
+
+        # TODO time limit and ordering and stuff
+        for connection in line.connections:
+            rd = {}
+            rd['line'] = line
+            rd['operator'] = operator
+            rd['duration'] = duration
+            rd['vehicle'] = connection.vehicle
+            rd['start'] = connection.start_time + start_delta
+            if rd['start'] < dt:
+                continue
+            rd['end'] = connection.start_time + end_delta
+            rd['free_seats'] = 'No one knows' # TODO
+            results.append(rd)
+    results.sort(key=lambda r: r['start'])
+    return render_template('search.html', results=results, from_=from_, to=to)
 
 @app.route('/login', methods=['GET','POST'])
 def login():

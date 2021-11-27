@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    <h4>{{ from_.name }} -> {{ to.name }}</h4>
+        {% for r in results %}
+    <div class="row p-3">
+      <div class="col">
+        <p>Operator: {{ r['operator'].name }}</p>
+        <p>Line: {{ r['line'].name }}</p>
+        <p>Vehicle: {{ r['vehicle'].description }}</p>
+        <p>Duration: {{ r['duration'] }}</p>
+        <p>Start: {{ r['start'] }}</p>
+        <p>End: {{ r['end'] }}</p>
+        <p>Free seats: {{ r['free_seats'] }}</p>
+        <p>Number of seats: {{ r['vehicle'].num_seats }}</p>
+      </div>
+    </div>
+        {% endfor %}
+  </div>
+</div>
+{% endblock %}
