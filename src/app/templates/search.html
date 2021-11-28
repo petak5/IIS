@@ -21,6 +21,7 @@
         <p>Arrives at {{ r['end'] }}</p>
         <p>Free seats: {{ r['free_seats'] }}</p>
         <p>Number of seats: {{ r['vehicle'].num_seats }}</p>
+        <a class="btn btn-primary" href="{{ url_for('connection_detail', id=r['connection'].id, from=r['from_pos'], to=r['to_pos']) }}">Detail</a>
         </div>
       </div>
     </div>

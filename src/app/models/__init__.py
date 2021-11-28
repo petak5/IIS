@@ -89,6 +89,10 @@ class Connection(Base):
     vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicle.id'), nullable=False)
     vehicle = db.relationship("Vehicle", backref="connections")
 
+    def get_free_seats(self, from_pos, to_pos):
+        occupied_seats = sum(ticket.num_seats for ticket in Ticket.query.filter_by(connection=self).filter(Ticket.from_pos < from_pos).filter(Ticket.to_pos > from_pos))
+        return self.vehicle.num_seats - occupied_seats
+
     def __init__(self, start_time):
         self.start_time = start_time
 
@@ -116,6 +120,11 @@ class Ticket(Base):
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     num_seats = db.Column(db.Integer, nullable=False, default=1)
     owner = db.relationship(User, backref="tickets")
+    connection_id = db.Column(db.Integer, db.ForeignKey('connection.id'))
+    connection = db.relationship(Connection, backref="tickets")
+    from_pos = db.Column(db.Integer, nullable=False)
+    to_pos = db.Column(db.Integer, nullable=False)
+    confirmed = db.Column(db.Boolean, nullable=False, default=False)
 
     def __init__(self, owner):
         self.owner = owner

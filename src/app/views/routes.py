@@ -724,14 +724,13 @@ def crew_positions_unset():
 
 
 
-@app.route('/user/reserve', methods=['GET', 'POST'])
-@auth('user')
-def user_reserve(): # TODO implement
+@app.route('/ticket_reserve', methods=['POST'])
+def ticket_reserve():
     return render_template('placeholder.html')
 
 @app.route('/user/tickets', methods=['GET', 'POST'])
 @auth('user')
-def user_position(): # TODO implement
+def user_tickets(): # TODO implement
     return render_template('placeholder.html')
 
 @app.route('/')
@@ -774,6 +773,7 @@ def search():
         # TODO time limit and ordering and stuff
         for connection in line.connections:
             rd = {}
+            rd['connection'] = connection
             rd['line'] = line
             rd['operator'] = operator
             rd['duration'] = duration
@@ -782,10 +782,43 @@ def search():
             if rd['start'] < dt:
                 continue
             rd['end'] = connection.start_time + end_delta
-            rd['free_seats'] = 'No one knows' # TODO
+            rd['free_seats'] = connection.get_free_seats(pos, to_ls.position)
+            rd['from_pos'] = pos
+            rd['to_pos'] = to_ls.position
             results.append(rd)
     results.sort(key=lambda r: r['start'])
     return render_template('search.html', results=results, from_=from_, to=to)
+
+@app.route('/connection_detail')
+def connection_detail():
+    connection_id = request.args.get('id')
+    connection = Connection.query.get(connection_id)
+    if not connection:
+        flash('Invalid connection', 'danger')
+        return redirect(g.redir)
+    from_pos = request.args.get('from', type=int)
+    to_pos = request.args.get('to', type=int)
+    if not from_pos or not to_pos: # TODO handle better?
+        flash('Invalid from/to position', danger)
+        return redirect(g.redir)
+
+    line = connection.line
+    stops = []
+    dt = connection.start_time
+    delta = timedelta(0)
+    for ls in LineStop.query.filter_by(line=line).order_by(LineStop.position):
+        stop = {}
+        stop['name'] = ls.stop.name
+        stop['position'] = ls.position
+        dt += timedelta(minutes=ls.time_delta)
+        stop['time'] = dt
+        stops.append(stop)
+    operator = line.operator
+    free_seats = connection.get_free_seats(from_pos, to_pos)
+
+
+
+    return render_template('connection_detail.html', connection=connection, operator=operator, stops=stops, from_pos=from_pos, to_pos=to_pos, free_seats=free_seats)
 
 @app.route('/login', methods=['GET','POST'])
 def login():
