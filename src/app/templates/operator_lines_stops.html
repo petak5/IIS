@@ -16,12 +16,12 @@
               <th scope="col">Position</th>
               <th scope="col">Stop ID</th>
               <th scope="col">Stop Name</th>
-              <th scope="col">Distance from previous in minutes</th>
+              <th scope="col">Distance from previous stop in minutes</th>
               <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
-          {% for lineStop in line.stops %}
+          {% for lineStop in LineStop.query.filter(LineStop.line == line).order_by(LineStop.position) %}
             <tr>
               <td scope="row">
                 {{ lineStop.position }}
@@ -36,8 +36,9 @@
                 {{ lineStop.time_delta }}
               </td>
               <td align="right" width="1%" nowrap>
-                <a class="btn btn-primary" href="{{ url_for('index', redir=url_for('operator_lines'), stop_id=lineStop.id) }}">Modify</a>
-                <a class="btn btn-danger" href="{{ url_for('operator_lines_delete', redir=url_for('operator_lines'), stop_id=lineStop.id) }}">Remove</a>
+                <a class="btn btn-primary" href="{{ url_for('operator_lines_stops_reorder', redir=url_for('operator_lines_stops', line_id=line.id), stop_id=lineStop.id, direction='up') }}">&#x25B2;</a>
+                <a class="btn btn-primary" href="{{ url_for('operator_lines_stops_reorder', redir=url_for('operator_lines_stops', line_id=line.id), stop_id=lineStop.id, direction='down') }}">&#x25BC;</a>
+                <a class="btn btn-danger" href="{{ url_for('operator_lines_stops_remove', redir=url_for('operator_lines_stops', line_id=line.id), stop_id=lineStop.id) }}">Remove</a>
               </td>
             </tr>
           {% endfor %}

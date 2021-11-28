@@ -488,7 +488,7 @@ def operator_lines_delete():
             return redirect(g.redir)
         db.session.delete(line)
         db.session.commit()
-        flash('Line successfully removed.', 'success')
+        flash('Line successfully deleted.', 'success')
         return redirect(g.redir)
 
 @app.route('/operator/lines/stops', methods=['GET', 'POST'])
@@ -503,7 +503,7 @@ def operator_lines_stops():
         if not line:
             flash('Line doesn\'t exist', 'danger')
             return redirect(g.redir)
-        return render_template('operator_lines_stops.html', Stop=Stop, line=line)
+        return render_template('operator_lines_stops.html', Stop=Stop, LineStop=LineStop, line=line)
     elif request.method == 'POST':
         line_id = request.form.get("line_id", type=int)
         stop_id = request.form.get("stop", type=int)
@@ -528,6 +528,64 @@ def operator_lines_stops():
         db.session.add(ls)
         db.session.commit()
         flash('New stop successfully added.', 'success')
+        return redirect(g.redir)
+
+@app.route('/operator/lines/stops/reorder', methods=['GET'])
+@auth('operator')
+def operator_lines_stops_reorder():
+    direction = request.args.get("direction")
+    if direction not in ["up", "down"]:
+        direction = "up"
+    stop_id = request.args.get("stop_id", type=int)
+    stop = LineStop.query.get(stop_id)
+    if not stop:
+        flash('Stop doesn\'t exist', 'danger')
+        return redirect(g.redir)
+    line = stop.line
+    if direction == "up":
+        stop.position -= 1
+        for ls in line.stops:
+            if ls.id == stop.id:
+                continue
+            if ls.position == stop.position:
+                ls.position += 1
+    else:
+        stop.position += 1
+        for ls in line.stops:
+            if ls.id == stop.id:
+                continue
+            if ls.position == stop.position:
+                ls.position -= 1
+
+    db.session.commit()
+    flash('Stop successfully moved.', 'success')
+    return redirect(g.redir)
+
+@app.route('/operator/lines/stops/remove', methods=['GET', 'POST'])
+@auth('operator')
+def operator_lines_stops_remove():
+    if request.method == 'GET':
+        stop_id = request.args.get("stop_id", type=int)
+        lineStop = LineStop.query.get(stop_id)
+        if not lineStop:
+            flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_lines_stops_remove.html', lineStop=lineStop)
+    elif request.method == 'POST':
+        stop_id = request.form.get("stop_id", type=int)
+        lineStop = LineStop.query.get(stop_id)
+        if not lineStop:
+            flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        line = lineStop.line
+        db.session.delete(lineStop)
+        # Update stop positions
+        counter = 1
+        for ls in line.stops:
+            ls.position = counter
+            counter += 1
+        db.session.commit()
+        flash('Stop successfully removed.', 'success')
         return redirect(g.redir)
 
 @app.route('/operator/vehicles', methods=['GET'])
