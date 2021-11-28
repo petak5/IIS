@@ -655,7 +655,7 @@ def operator_vehicles():
     if not g.operator:
         flash('Only operator can view this page', 'danger')
         return render_template('placeholder.html')
-    return render_template('operator_vehicles.html', operator=g.user.operator)
+    return render_template('operator_vehicles.html', operator=g.operator)
 
 @app.route('/operator/vehicles/add', methods=['POST'])
 @auth('operator')
@@ -699,10 +699,10 @@ def operator_vehicles_remove():
 @app.route('/operator/crew', methods=['GET'])
 @auth('operator')
 def operator_crew():
-    if not g.user.operator:
+    if not g.operator:
         flash('Only operator can view this page', 'danger')
         return render_template('placeholder.html')
-    return render_template('operator_crew.html', User=User, operator=g.user.operator)
+    return render_template('operator_crew.html', User=User, operator=g.operator)
 
 @app.route('/operator/crew/add', methods=['POST'])
 @auth('operator')
