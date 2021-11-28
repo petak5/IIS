@@ -56,7 +56,7 @@
               {% endfor %}
             </select>
             {% if line.stops|count > 0 %}
-              <input type="number" class="form-control" name="time_delta" placeholder="Distance from previous in minutes" required>
+              <input type="number" class="form-control" name="time_delta" placeholder="Distance from previous in minutes" min="0" required>
             {% endif %}
             <input type="hidden" name="line_id" value="{{ line.id }}">
             <input type="hidden" name="redir" value="{{ url_for('operator_lines_stops', line_id=line.id) }}">

@@ -46,7 +46,7 @@
 
         <span>
           <form action="{{ url_for('ticket_reserve') }}" method="POST" class="g-3">
-            <input type="number" class="form-control" name="seats" placeholder="Seats" required>
+            <input type="number" class="form-control" name="seats" placeholder="Seats" min="1" max="{{ connection.get_free_seats(from_pos, to_pos) }}" required>
             <input type="hidden" name="redir" value="{{ url_for('user_tickets') }}">
             <input type="hidden" name="connection" value="{{ connection.id }}">
             <input type="hidden" name="from" value="{{ from_pos }}">

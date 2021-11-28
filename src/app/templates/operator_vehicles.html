@@ -45,7 +45,7 @@
         <span>
           <form action="{{ url_for('operator_vehicles_add') }}" method="POST" class="g-3">
             <input type="text" class="form-control" name="description" placeholder="Description">
-            <input type="number" class="form-control" name="seats" placeholder="Seats" required>
+            <input type="number" class="form-control" name="seats" placeholder="Seats" min="1" required>
             <input type="hidden" name="redir" value="{{ url_for('operator_vehicles') }}">
             <button type="submit" class="col-auto btn btn-primary">Add Vehicle</button>
           </form>
