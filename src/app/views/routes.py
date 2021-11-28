@@ -452,6 +452,29 @@ def operator_connections_add():
     flash('New connection successfully added.', 'success')
     return redirect(g.redir)
 
+@app.route('/operator/connections/delete', methods=['GET', 'POST'])
+@auth('operator')
+def operator_connections_delete():
+    if request.method == 'GET':
+        connection_id = request.args.get("id", type=int)
+        connection = Connection.query.get(connection_id)
+        if not connection:
+            flash('Connection doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('operator_connections_delete.html', connection=connection)
+    elif request.method == 'POST':
+        connection_id = request.form.get("id", type=int)
+        connection = Connection.query.get(connection_id)
+        if not connection:
+            flash('Connection doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        for ticket in connection.tickets:
+            db.session.delete(ticket)
+        db.session.delete(connection)
+        db.session.commit()
+        flash('Connection successfully deleted.', 'success')
+        return redirect(g.redir)
+
 @app.route('/operator/lines', methods=['GET'])
 @auth('operator')
 def operator_lines():
