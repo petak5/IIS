@@ -82,7 +82,10 @@ def load_user():
         if g.operator == None:
             del session['admin_operator_id']
     if g.user:
-        g.operator = g.user.operator
+        if g.user.is_operator():
+            g.operator = g.user.operator
+        elif g.user.is_crew():
+            g.operator = g.user.employer
 
 @app.route('/admin/stops')
 @auth('admin')
@@ -673,10 +676,53 @@ def operator_transfer():
 def crew_tickets(): # TODO implement
     return render_template('placeholder.html')
 
-@app.route('/crew/positions', methods=['GET', 'POST'])
+@app.route('/crew/positions')
 @auth('crew')
-def crew_positions(): # TODO implement
-    return render_template('placeholder.html')
+def crew_positions():
+    return render_template('crew_positions.html', Vehicle=Vehicle)
+
+@app.route('/crew/positions/set', methods=['GET', 'POST'])
+@auth('crew')
+def crew_positions_set():
+    if request.method == 'GET':
+        vehicle_id = request.args.get('id')
+        vehicle = Vehicle.query.get(vehicle_id)
+        if not vehicle:
+            flash('Vehicle doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        return render_template('crew_positions_set.html', vehicle=vehicle, Stop=Stop)
+    elif request.method == 'POST':
+        vehicle_id = request.form.get('id', type=int)
+        if g.user.is_admin():
+            vehicle = Vehicle.query.get(vehicle_id)
+        else:
+            vehicle = Vehicle.query.filter_by(operator=g.operator, id=vehicle_id).first()
+        stop_name = request.form.get('position')
+        stop = Stop.query.filter_by(name=stop_name).first()
+        if not stop or not vehicle:
+            flash('Invalid request', 'danger')
+            return redirect(g.redir)
+        vehicle.last_known_stop = stop
+        db.session.add(vehicle)
+        db.session.commit()
+        flash('Stop changed successfuly', 'success')
+        return redirect(g.redir)
+
+@app.route('/crew/positions/unset')
+@auth('crew')
+def crew_positions_unset():
+    vehicle_id = request.args.get('id', type=int)
+    if g.user.is_admin():
+        vehicle = Vehicle.query.get(vehicle_id)
+    else:
+        vehicle = Vehicle.query.filter_by(operator=g.operator, id=vehicle_id).first()
+    vehicle.last_known_stop = None
+    db.session.add(vehicle)
+    db.session.commit()
+    flash('Position unset', 'success')
+    return redirect(g.redir)
+
+
 
 @app.route('/user/reserve', methods=['GET', 'POST'])
 @auth('user')
@@ -707,10 +753,10 @@ def search():
     to = Stop.query.filter_by(name=to).first()
     # TODO fuzzy match
     if not from_:
-        flash(f'No such stop <b>{from_}</b>', 'danger')
+        flash(f"No such stop '{from_}'", 'danger')
         return redirect(g.redir)
     if not to:
-        flash(f'No such stop <b>{to}</b>', 'danger')
+        flash(f"No such stop '{to}'", 'danger')
         return redirect(g.redir)
     # TODO error check
     for from_ls in from_.lines:

@@ -4,19 +4,24 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container-fluid">
-    <h4>{{ from_.name }} -> {{ to.name }}</h4>
+<div class="container-fluid">
+  <div class="row p-3">
+    <h4>{{ from_.name }} ⟶ {{ to.name }}</h4>
+    <h6>{{ results|length }} results found</h6>
+    </div>
         {% for r in results %}
     <div class="row p-3">
-      <div class="col">
+      <div class="col card">
+        <div class="card-body">
         <p>Operator: {{ r['operator'].name }}</p>
         <p>Line: {{ r['line'].name }}</p>
         <p>Vehicle: {{ r['vehicle'].description }}</p>
-        <p>Duration: {{ r['duration'] }}</p>
-        <p>Start: {{ r['start'] }}</p>
-        <p>End: {{ r['end'] }}</p>
+        <p>Leaves at {{ r['start'] }}</p>
+        <p>Travel time {{ r['duration'] }}</p>
+        <p>Arrives at {{ r['end'] }}</p>
         <p>Free seats: {{ r['free_seats'] }}</p>
         <p>Number of seats: {{ r['vehicle'].num_seats }}</p>
+        </div>
       </div>
     </div>
         {% endfor %}

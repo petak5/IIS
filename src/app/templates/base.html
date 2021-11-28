@@ -57,6 +57,7 @@
         {% if g.is_auth('user') %}
         <li class="nav-item"><a class="nav-link" href="{{ url_for('user_reserve') }}">My Tickets</a></li>
         {% endif %}
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Search</a></li>
       </ul>
       <ul class="navbar-nav ms-auto">
       {% if g.user %}

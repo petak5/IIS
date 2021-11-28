@@ -97,7 +97,8 @@ class Vehicle(Base):
     operator = db.relationship("Operator", backref="vehicles")
     description = db.Column(db.String(128), nullable=False, default='')
     num_seats = db.Column(db.Integer, nullable=False)
-    last_known_stop = db.Column(db.Integer, db.ForeignKey('stop.id'), default=None)
+    last_known_stop_id = db.Column(db.Integer, db.ForeignKey('stop.id'), default=None)
+    last_known_stop = db.relationship("Stop")
     last_known_time = db.Column(db.DateTime, default=None)
 
     def __init__(self, operator):
