@@ -430,7 +430,7 @@ def operator_connections():
     if not g.operator:
         flash('Only operator can view this page', 'danger')
         return render_template('placeholder.html')
-    return render_template('operator_connections.html', operator=g.operator)
+    return render_template('operator_connections.html', Connection=Connection, operator=g.operator)
 
 @app.route('/operator/connections/add', methods=['POST'])
 @auth('operator')
@@ -451,6 +451,40 @@ def operator_connections_add():
     db.session.commit()
     flash('New connection successfully added.', 'success')
     return redirect(g.redir)
+
+@app.route('/operator/connections/stops', methods=['GET', 'POST'])
+@auth('operator')
+def operator_connections_stops():
+    if not g.operator:
+        flash('Only operator can view this page', 'danger')
+        return render_template('placeholder.html')
+    if request.method == 'GET':
+        connection_id = request.args.get("connection_id", type=int)
+        connection = Connection.query.get(connection_id)
+        if not connection:
+            flash('Connection doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        line = connection.line
+        stops = []
+        dt = connection.start_time
+        for ls in LineStop.query.filter_by(line=line).order_by(LineStop.position):
+            stop = {}
+            stop['name'] = ls.stop.name
+            stop['position'] = ls.position
+            dt += timedelta(minutes=ls.time_delta)
+            stop['time'] = dt
+            stops.append(stop)
+        return render_template('operator_connection_stops.html', connection=connection, stops=stops)
+    elif request.method == 'POST':
+        connection_id = request.form.get("connection_id", type=int)
+        connection = Connection.query.get(connection_id)
+        if not connection:
+            flash('Connection doesn\'t exist', 'danger')
+            return redirect(g.redir)
+
+        db.session.commit()
+        flash('New stop successfully added.', 'success')
+        return redirect(g.redir)
 
 @app.route('/operator/connections/delete', methods=['GET', 'POST'])
 @auth('operator')
@@ -884,7 +918,7 @@ def connection_detail():
     from_pos = request.args.get('from', type=int)
     to_pos = request.args.get('to', type=int)
     if not from_pos or not to_pos: # TODO handle better?
-        flash('Invalid from/to position', danger)
+        flash('Invalid from/to position', 'danger')
         return redirect(g.redir)
 
     line = connection.line

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row p-3">
+    <div class="col">
+      <h2>Stops of connection id <b>{{ connection.id }}</b></h2>
+      <p>
+        Line: {{ connection.line.name }}<br>
+        Operator: {{ connection.line.operator.name }}<br>
+        Vehicle: {{ connection.vehicle.description }}<br>
+        Seats: {{ connection.vehicle.num_seats }}<br>
+      </p>
+
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Stop</th>
+            <th scope="col">Time</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for stop in stops %}
+          <tr>
+            <td>
+              {{ stop['name'] }}
+              {% if stop['position'] == from_pos %}
+                <span class="badge bg-primary">From</span>
+              {% elif stop['position'] == to_pos %}
+                <span class="badge bg-secondary">To</span>
+              {% endif %}
+            </td>
+            <td>
+              {{ '%02d:%02d' % (stop['time'].hour, stop['time'].minute) }}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -25,48 +25,48 @@
             </tr>
           </thead>
           <tbody>
-          {% for line in operator.lines %}
-            {% for connection in line.connections %}
-              <tr>
-                <td scope="row">
-                  {{ connection.id }}
-                </td>
-                <td>
-                  {{ connection.line.id }}
-                </td>
-                <td>
-                  {{ connection.line.name }}
-                </td>
-                <td>
-                  {% if connection.line.stops|count > 0 %}
-                    {{ connection.line.stops[0].stop.name }}
-                  {% else %}
-                    None
-                  {% endif %}
-                </td>
-                <td>
-                  {% if connection.line.stops|count > 0 %}
-                    {{ connection.line.stops[connection.line.stops|count - 1].stop.name }}
-                  {% else %}
-                    None
-                  {% endif %}
-                </td>
-                <td>
-                  {{ connection.vehicle.id }}
-                </td>
-                <td>
-                  {{ connection.vehicle.description }}
-                </td>
-                <td>
-                  {{ connection.start_time }}
-                </td>
-                <td align="right" width="1%" nowrap>
-                  <a class="btn btn-primary" href="{{ url_for('index', redir=url_for('operator_connections'), id=connection.id) }}">Detail</a>
-                  <a class="btn btn-danger" href="{{ url_for('operator_connections_delete', redir=url_for('operator_connections'), id=connection.id) }}">Delete</a>
-                </td>
-              </tr>
+            {% for connection in Connection.query.order_by(Connection.id) %}
+              {% if connection.line.operator == operator %}
+                <tr>
+                  <td scope="row">
+                    {{ connection.id }}
+                  </td>
+                  <td>
+                    {{ connection.line.id }}
+                  </td>
+                  <td>
+                    {{ connection.line.name }}
+                  </td>
+                  <td>
+                    {% if connection.line.stops|count > 0 %}
+                      {{ connection.line.stops[0].stop.name }}
+                    {% else %}
+                      None
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if connection.line.stops|count > 0 %}
+                      {{ connection.line.stops[connection.line.stops|count - 1].stop.name }}
+                    {% else %}
+                      None
+                    {% endif %}
+                  </td>
+                  <td>
+                    {{ connection.vehicle.id }}
+                  </td>
+                  <td>
+                    {{ connection.vehicle.description }}
+                  </td>
+                  <td>
+                    {{ connection.start_time }}
+                  </td>
+                  <td align="right" width="1%" nowrap>
+                    <a class="btn btn-primary" href="{{ url_for('operator_connections_stops', connection_id=connection.id) }}">Stops</a>
+                    <a class="btn btn-danger" href="{{ url_for('operator_connections_delete', redir=url_for('operator_connections'), id=connection.id) }}">Delete</a>
+                  </td>
+                </tr>
+              {% endif %}
             {% endfor %}
-          {% endfor %}
           </tbody>
         </table>
 
