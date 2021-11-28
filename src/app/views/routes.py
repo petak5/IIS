@@ -486,6 +486,10 @@ def operator_lines_delete():
         if not line:
             flash('Line doesn\'t exist', 'danger')
             return redirect(g.redir)
+        for connection in line.connections:
+            db.session.delete(connection)
+        for lineStop in line.stops:
+            db.session.delete(lineStop)
         db.session.delete(line)
         db.session.commit()
         flash('Line successfully deleted.', 'success')
