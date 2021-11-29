@@ -94,7 +94,7 @@ class Connection(Base):
             return 0
         if not LineStop.query.filter_by(line=self.line, position=to_pos).first():
             return 0
-        occupied_seats = sum(ticket.num_seats for ticket in Ticket.query.filter_by(connection=self).filter(Ticket.from_pos < from_pos).filter(Ticket.to_pos > from_pos))
+        occupied_seats = sum(ticket.num_seats for ticket in Ticket.query.filter_by(connection=self).filter(Ticket.from_pos <= from_pos).filter(Ticket.to_pos >= from_pos))
         return self.vehicle.num_seats - occupied_seats
 
     def __init__(self, start_time):
