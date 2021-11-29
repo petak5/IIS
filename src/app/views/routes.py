@@ -1,6 +1,6 @@
 from app import app
 from app.models import db
-from app.models import User, StopProposal, Stop, Operator, Vehicle, Line, LineStop, Connection
+from app.models import User, StopProposal, Stop, Operator, Vehicle, Line, LineStop, Connection, Ticket
 from flask import request, session, render_template, g, abort, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
@@ -873,7 +873,46 @@ def crew_positions_unset():
 
 @app.route('/ticket_reserve', methods=['POST'])
 def ticket_reserve():
-    return render_template('placeholder.html')
+    connection = Connection.query.get(request.form.get('connection', type=int))
+    num_seats = request.form.get('seats', type=int)
+    from_ = request.form.get('from', type=int)
+    to = request.form.get('to', type=int)
+    if not connection or from_ == None or to == None or num_seats <= 0:
+        flash('Invalid request', 'danger')
+        return redirect(g.redir)
+    login = request.form.get('login')
+    password = request.form.get('password')
+    if not g.user and (login == None or login == '' or password == None or password == ''):
+        flash('Invalid request', 'danger')
+        return redirect(g.redir)
+    user = User(login, password)
+    db.session.add(user)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        flash(f"Login {user.login} is already taken.", 'danger')
+        return redirect(g.redir)
+    except:
+        flash("Unknown error", 'danger')
+        return redirect(g.redir)
+
+    if connection.get_free_seats(from_, to) < num_seats:
+        flash('Not enough free seats', 'danger')
+        return redirect(g.redir)
+    ticket = Ticket(user)
+    ticket.connection = connection
+    ticket.num_seats = num_seats
+    ticket.from_pos = from_
+    ticket.to_pos = to
+    db.session.add(ticket)
+    db.session.commit()
+
+    if g.user:
+        flash('Ticket reserved successfuly', 'success')
+        return redirect(url_for('user_tickets'))
+    else:
+        flash('Ticket reserved and account created, you may login now', 'success')
+        return redirect(url_for('login', redir=url_for('user_tickets')))
 
 @app.route('/user/tickets', methods=['GET', 'POST'])
 @auth('user')

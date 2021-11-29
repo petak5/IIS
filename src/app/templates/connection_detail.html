@@ -52,8 +52,8 @@
             <input type="hidden" name="from" value="{{ from_pos }}">
             <input type="hidden" name="to" value="{{ to_pos }}">
             {% if not g.user %}
-            <input type="text" class="form-control" name="seats" placeholder="Login" required>
-            <input type="password" class="form-control" name="seats" placeholder="Password" required>
+            <input type="text" class="form-control" name="login" placeholder="Login" required>
+            <input type="password" class="form-control" name="password" placeholder="Password" required>
             <button type="submit" class="col-auto btn btn-primary">Register and Reserve</button>
             {% else %}
             <button type="submit" class="col-auto btn btn-primary">Reserve</button>
