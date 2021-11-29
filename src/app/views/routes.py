@@ -5,6 +5,7 @@ from flask import request, session, render_template, g, abort, flash, redirect, 
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
 from datetime import datetime, timedelta
+import time
 
 def login_user(login, password):
     user = User.query.filter_by(login=login).first()
@@ -67,6 +68,18 @@ def load_user():
     g.is_auth = is_auth
     g.user = None
     g.operator = None
+    if 'user_id' in session and (not session.get('last_activity') or session["last_activity"]+900 < time.time()):
+        try:
+            del session['last_activity']
+            del session['user_id']
+            del g.user
+            del session['admin_operator_id']
+            del g.operator
+        except KeyError or AttributeError:
+            pass
+        flash("You have been logged out due to inactivity", 'warning')
+        return redirect(url_for('index'))
+
     if "user_id" in session:
         user_id = session["user_id"]
         g.user = User.query.get(user_id)
@@ -86,6 +99,7 @@ def load_user():
             g.operator = g.user.operator
         elif g.user.is_crew():
             g.operator = g.user.employer
+    session['last_activity'] = time.time()
 
 @app.route('/admin/stops')
 @auth('admin')
