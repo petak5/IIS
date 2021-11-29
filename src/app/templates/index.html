@@ -8,10 +8,13 @@
   <div class="container-fluid py-3">
     <form method="get" action="{{ url_for('search') }}" class="p-3 mx-auto">
       <h4>Search</h4>
+      <label class="form-label">Departure After</label>
+      <input type="date" class="form-control" name="dep_date" value="{{ date }}" required>
+      <input type="time" class="form-control" name="dep_time" value="{{ time }}" required>
       <label for="from" class="form-label">From</label>
-      <input style="max-width: 30em" type="text" list="stops" class="form-control" name="from">
+      <input style="max-width: 30em" type="text" list="stops" class="form-control" name="from" required>
       <label for="to" class="form-label">To</label>
-      <input style="max-width: 30em" type="text" list="stops" class="form-control" name="to">
+      <input style="max-width: 30em" type="text" list="stops" class="form-control" name="to" required>
       <button type="submit" class="btn btn-danger">Search</button>
       <datalist id="stops">
         {% for stop in Stop.query.order_by(Stop.name) %}

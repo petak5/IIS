@@ -1120,22 +1120,22 @@ def user_tickets():
 
 @app.route('/')
 def index():
-    return render_template('index.html', Stop=Stop)
+    now = datetime.now()
+    return render_template('index.html', Stop=Stop, date=now.strftime("%Y-%m-%d"), time=now.strftime("%H:%M"))
 
 @app.route('/search')
 def search():
     results = []
     from_str = request.args.get('from')
     to_str = request.args.get('to')
-    dt = request.args.get('dt', type=int) # show only connections leaving later than this
-    if dt:
-        dt = datetime.fromtimestamp(dt)
-    else:
-        dt = datetime.now()
+    departure_date = request.args.get("dep_date")
+    departure_time = request.args.get("dep_time")
+    date = datetime.strptime(departure_date, "%Y-%m-%d")
+    time = datetime.strptime(departure_time, "%H:%M")
+    dt = datetime.combine(date, time.time())
 
     from_ = Stop.query.filter_by(name=from_str).first()
     to = Stop.query.filter_by(name=to_str).first()
-    # TODO fuzzy match
     if not from_:
         flash(f"No such stop '{from_str}'", 'danger')
         return redirect(g.redir)
@@ -1254,7 +1254,7 @@ def register():
             flash("Both login and password are required parameters.", 'danger')
             redirect(url_for('register'))
         user = User(login, password)
-        if login == 'admin': # TODO only to simplify testing, remove later
+        if login == 'admin': # to simplify testing
             user.admin = True
         db.session.add(user)
         try:
