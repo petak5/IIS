@@ -880,21 +880,24 @@ def ticket_reserve():
     if not connection or from_ == None or to == None or num_seats <= 0:
         flash('Invalid request', 'danger')
         return redirect(g.redir)
-    login = request.form.get('login')
-    password = request.form.get('password')
-    if not g.user and (login == None or login == '' or password == None or password == ''):
-        flash('Invalid request', 'danger')
-        return redirect(g.redir)
-    user = User(login, password)
-    db.session.add(user)
-    try:
-        db.session.commit()
-    except IntegrityError:
-        flash(f"Login {user.login} is already taken.", 'danger')
-        return redirect(g.redir)
-    except:
-        flash("Unknown error", 'danger')
-        return redirect(g.redir)
+    if not g.user:
+        login = request.form.get('login')
+        password = request.form.get('password')
+        if login == None or login == '' or password == None or password == '':
+            flash('Invalid request', 'danger')
+            return redirect(g.redir)
+        user = User(login, password)
+        db.session.add(user)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            flash(f"Login {user.login} is already taken.", 'danger')
+            return redirect(g.redir)
+        except:
+            flash("Unknown error", 'danger')
+            return redirect(g.redir)
+    else:
+        user = g.user
 
     if connection.get_free_seats(from_, to) < num_seats:
         flash('Not enough free seats', 'danger')
