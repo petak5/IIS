@@ -19,15 +19,17 @@
 <dl>
   <dt>Autori</dt>
   <dd>Peter Mann
-    <a href="mailto:xautor02@stud.fit.vutbr.cz">xmannp00@stud.fit.vutbr.cz</a> -
-    vedúci týmu
+    <a href="mailto:xautor02@stud.fit.vutbr.cz">xmannp00@stud.fit.vutbr.cz</a> - frontend
   </dd>
   <dd>Peter Urgo¹
-    <a href="mailto:xautor01@stud.fit.vutbr.cz">xurgos00@stud.fit.vutbr.cz</a>
+    <a href="mailto:xautor01@stud.fit.vutbr.cz">xurgos00@stud.fit.vutbr.cz</a> - backend
   </dd>
   <dd>Simon Lap¹anský
-    <a href="mailto:xautor03@stud.fit.vutbr.cz">xlapsa01@stud.fit.vutbr.cz</a>
+    <a href="mailto:xautor03@stud.fit.vutbr.cz">xlapsa01@stud.fit.vutbr.cz</a> - testovanie
   </dd>
+  <dd>
+  Èinnosti v tíme neboli pevne rozdelené a reprezentujú iba pribli¾né zameranie.
+    </dd>
   <dt>URL aplikáce</dt>
   <dd><a href="http://iis.xdd.sk/">http://iis.xdd.sk/</a></dd>
 </dl>
@@ -44,8 +46,19 @@
 </table>
 
 <h2>Implementácia</h2>
-<p>Struèná dokumentace k implementaci, která popisuje, které èásti
-  projektu (napø. PHP skripty) implementují jednotlivé pøípady pou¾ití.</p>
+<p>Vyu¾ívame framework Flask a ako ORM sqlalchemy</p>
+<p>ORM model je v src/app/models/__init__.py</p>
+<p>V¹etky prípady pou¾itia sú implementované v src/app/views/routes.py</p>
+<p>Funkcie ktoré implementujú prípady pou¾itia pre admina majú predponu admin_<br>
+operator_ pre dopravcu, crew_ pre personál, user_ pre pou¾ívateµa</p>
+<p>src/app/static/ obsahuje 3 súbory tretích strán</p>
+<ul>
+  <li>jquery-3.6.0.min.js<br>Dostupné na: <a href="https://code.jquery.com/jquery-3.6.0.min.js">https://code.jquery.com/jquery-3.6.0.min.js</a></li>
+  <li>bootstrap.min.css</li>
+  <li>bootstrap.bundle.min.js<br>Dostupné v tomto archíve: <a href="https://github.com/twbs/bootstrap/releases/download/v5.1.3/bootstrap-5.1.3-dist.zip">https://github.com/twbs/bootstrap/releases/download/v5.1.3/bootstrap-5.1.3-dist.zip</a> </li>
+</ul>
+<p>src/app/templates/ obsahuje ¹ablóny ktoré pou¾ívame v routes.py na generovanie HTML</p>
+<p>Session cookies rie¹ime pomocou funkcionality vstavanej vo Flask. Meno momentálne prihláseného pou¾ívateµa je udr¾iavané na klientovi a chránené kryptografickým podpisom.</p>
 
 <h3>Databáza</h3>
 
