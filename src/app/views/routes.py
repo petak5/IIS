@@ -78,7 +78,7 @@ def load_user():
         g.redir = url_for('index')
 
     if "admin_operator_id" in session:
-        g.operator = Operator.get(int(session['admin_operator_id']))
+        g.operator = Operator.query.get(int(session['admin_operator_id']))
         if g.operator == None:
             del session['admin_operator_id']
     if g.user:
@@ -308,9 +308,9 @@ def admin_users_delete():
 @auth('admin')
 def admin_operators_pick():
     if request.method == 'GET':
-        return render_template('admin_operators_pick.html')
+        return render_template('admin_operators_pick.html', Operator=Operator, operator=g.operator)
     if request.method == 'POST':
-        operator_id = request.form.get('id', type=int)
+        operator_id = request.form.get('operator', type=int)
         if operator_id:
             session['admin_operator_id'] = operator_id
         return redirect(g.redir)
@@ -428,8 +428,11 @@ def operator_stops_proposal_delete():
 @auth('operator')
 def operator_connections():
     if not g.operator:
-        flash('Only operator can view this page', 'danger')
-        return render_template('placeholder.html')
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only operator can view this page', 'danger')
+            return render_template('placeholder.html')
     return render_template('operator_connections.html', Connection=Connection, operator=g.operator)
 
 @app.route('/operator/connections/add', methods=['POST'])
@@ -456,8 +459,11 @@ def operator_connections_add():
 @auth('operator')
 def operator_connections_stops():
     if not g.operator:
-        flash('Only operator can view this page', 'danger')
-        return render_template('placeholder.html')
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only operator can view this page', 'danger')
+            return render_template('placeholder.html')
     if request.method == 'GET':
         connection_id = request.args.get("connection_id", type=int)
         connection = Connection.query.get(connection_id)
@@ -513,8 +519,11 @@ def operator_connections_delete():
 @auth('operator')
 def operator_lines():
     if not g.operator:
-        flash('Only operator can view this page', 'danger')
-        return render_template('placeholder.html')
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only operator can view this page', 'danger')
+            return render_template('placeholder.html')
     return render_template('operator_lines.html', operator=g.operator)
 
 @app.route('/operator/lines/add', methods=['POST'])
@@ -556,8 +565,11 @@ def operator_lines_delete():
 @auth('operator')
 def operator_lines_stops():
     if not g.operator:
-        flash('Only operator can view this page', 'danger')
-        return render_template('placeholder.html')
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only operator can view this page', 'danger')
+            return render_template('placeholder.html')
     if request.method == 'GET':
         line_id = request.args.get("line_id", type=int)
         line = Line.query.get(line_id)
@@ -653,8 +665,11 @@ def operator_lines_stops_remove():
 @auth('operator')
 def operator_vehicles():
     if not g.operator:
-        flash('Only operator can view this page', 'danger')
-        return render_template('placeholder.html')
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only operator can view this page', 'danger')
+            return render_template('placeholder.html')
     return render_template('operator_vehicles.html', operator=g.operator)
 
 @app.route('/operator/vehicles/add', methods=['POST'])
@@ -700,8 +715,11 @@ def operator_vehicles_remove():
 @auth('operator')
 def operator_crew():
     if not g.operator:
-        flash('Only operator can view this page', 'danger')
-        return render_template('placeholder.html')
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only operator can view this page', 'danger')
+            return render_template('placeholder.html')
     return render_template('operator_crew.html', User=User, operator=g.operator)
 
 @app.route('/operator/crew/add', methods=['POST'])
@@ -793,11 +811,23 @@ def operator_transfer():
 @app.route('/crew/tickets', methods=['GET', 'POST'])
 @auth('crew')
 def crew_tickets(): # TODO implement
+    if not g.operator:
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only operator can view this page', 'danger')
+            return render_template('placeholder.html')
     return render_template('placeholder.html')
 
 @app.route('/crew/positions')
 @auth('crew')
 def crew_positions():
+    if not g.operator:
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only operator can view this page', 'danger')
+            return render_template('placeholder.html', redir='')
     return render_template('crew_positions.html', Vehicle=Vehicle)
 
 @app.route('/crew/positions/set', methods=['GET', 'POST'])
@@ -840,8 +870,6 @@ def crew_positions_unset():
     db.session.commit()
     flash('Position unset', 'success')
     return redirect(g.redir)
-
-
 
 @app.route('/ticket_reserve', methods=['POST'])
 def ticket_reserve():
@@ -968,7 +996,7 @@ def logout():
         del session['user_id']
         del g.user
         del session['admin_operator_id']
-        del g.operator_id
+        del g.operator
     except KeyError or AttributeError:
         pass
     flash("You have been logged out", 'success')

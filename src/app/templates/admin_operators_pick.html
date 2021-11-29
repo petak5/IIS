@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <form method="post" action="{{ url_for('admin_operators_pick') }}" class="p-3">
+      {% if operator is none %}
+        <h4 class="py-3">No operator currently picked</h4>
+      {% else %}
+        <h4 class="py-3">Currently picked operator is <b>{{ operator.name }}</b></h4>
+      {% endif %}
+      <div class="mb-3">
+        <label for="operator" class="form-label">Change operator to:</label>
+        <select class="form-select" id="operator" name="operator" required>
+          <option value="" selected>Select Operator</option>
+          {% for op in Operator.query.order_by(Operator.name) %}
+            <option value="{{ op.id }}">{{ op.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <input type="hidden" name="redir" value="{{ g.redir }}">
+      <button type="submit" class="btn btn-warning">Change Operator</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
