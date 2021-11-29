@@ -431,8 +431,8 @@ def operator_connections():
         if g.user.is_admin():
             return redirect(url_for('admin_operators_pick', redir=request.url))
         else:
-            flash('Only operator can view this page', 'danger')
-            return render_template('placeholder.html')
+            flash('Only operator can view that page', 'danger')
+            return redirect(g.redir)
     return render_template('operator_connections.html', Connection=Connection, operator=g.operator)
 
 @app.route('/operator/connections/add', methods=['POST'])
@@ -462,8 +462,8 @@ def operator_connections_stops():
         if g.user.is_admin():
             return redirect(url_for('admin_operators_pick', redir=request.url))
         else:
-            flash('Only operator can view this page', 'danger')
-            return render_template('placeholder.html')
+            flash('Only operator can view that page', 'danger')
+            return redirect(g.redir)
     if request.method == 'GET':
         connection_id = request.args.get("connection_id", type=int)
         connection = Connection.query.get(connection_id)
@@ -522,8 +522,8 @@ def operator_lines():
         if g.user.is_admin():
             return redirect(url_for('admin_operators_pick', redir=request.url))
         else:
-            flash('Only operator can view this page', 'danger')
-            return render_template('placeholder.html')
+            flash('Only operator can view that page', 'danger')
+            return redirect(g.redir)
     return render_template('operator_lines.html', operator=g.operator)
 
 @app.route('/operator/lines/add', methods=['POST'])
@@ -568,8 +568,8 @@ def operator_lines_stops():
         if g.user.is_admin():
             return redirect(url_for('admin_operators_pick', redir=request.url))
         else:
-            flash('Only operator can view this page', 'danger')
-            return render_template('placeholder.html')
+            flash('Only operator can view that page', 'danger')
+            return redirect(g.redir)
     if request.method == 'GET':
         line_id = request.args.get("line_id", type=int)
         line = Line.query.get(line_id)
@@ -668,8 +668,8 @@ def operator_vehicles():
         if g.user.is_admin():
             return redirect(url_for('admin_operators_pick', redir=request.url))
         else:
-            flash('Only operator can view this page', 'danger')
-            return render_template('placeholder.html')
+            flash('Only operator can view that page', 'danger')
+            return redirect(g.redir)
     return render_template('operator_vehicles.html', operator=g.operator)
 
 @app.route('/operator/vehicles/add', methods=['POST'])
@@ -718,8 +718,8 @@ def operator_crew():
         if g.user.is_admin():
             return redirect(url_for('admin_operators_pick', redir=request.url))
         else:
-            flash('Only operator can view this page', 'danger')
-            return render_template('placeholder.html')
+            flash('Only operator can view that page', 'danger')
+            return redirect(g.redir)
     return render_template('operator_crew.html', User=User, operator=g.operator)
 
 @app.route('/operator/crew/add', methods=['POST'])
@@ -815,8 +815,8 @@ def crew_tickets(): # TODO implement
         if g.user.is_admin():
             return redirect(url_for('admin_operators_pick', redir=request.url))
         else:
-            flash('Only operator can view this page', 'danger')
-            return render_template('placeholder.html')
+            flash('Only crew can view that page', 'danger')
+            return redirect(g.redir)
     return render_template('placeholder.html')
 
 @app.route('/crew/positions')
@@ -826,8 +826,8 @@ def crew_positions():
         if g.user.is_admin():
             return redirect(url_for('admin_operators_pick', redir=request.url))
         else:
-            flash('Only operator can view this page', 'danger')
-            return render_template('placeholder.html', redir='')
+            flash('Only crew can view that page', 'danger')
+            return redirect(g.redir)
     return render_template('crew_positions.html', Vehicle=Vehicle)
 
 @app.route('/crew/positions/set', methods=['GET', 'POST'])
