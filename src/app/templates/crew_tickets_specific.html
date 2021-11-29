@@ -47,10 +47,10 @@
                 <form method="post" class="form-inline" nowrap>
                   <input type="hidden" name="redir" value="{{ url_for('crew_tickets_specific', connection_id=connection.id) }}">
                   <input type="hidden" name="id" value="{{ ticket.id }}">
+                  <button type="submit" formaction="{{ url_for('crew_tickets_cancel') }}" class="btn btn-danger">Cancel</button>
                   {% if ticket.confirmed %}
                   <button type="submit" formaction="{{ url_for('crew_tickets_issue') }}" class="btn btn-primary">Issue Ticket</button>
                   {% else %}
-                  <button type="submit" formaction="{{ url_for('crew_tickets_cancel') }}" class="btn btn-danger">Cancel</button>
                   <button type="submit" formaction="{{ url_for('crew_tickets_confirm') }}" class="btn btn-success">Confirm</button>
                   {% endif %}
                 </form>
