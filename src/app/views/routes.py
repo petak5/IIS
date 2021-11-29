@@ -929,22 +929,22 @@ def index():
 @app.route('/search')
 def search():
     results = []
-    from_ = request.args.get('from')
-    to = request.args.get('to')
+    from_str = request.args.get('from')
+    to_str = request.args.get('to')
     dt = request.args.get('dt', type=int) # show only connections leaving later than this
     if dt:
         dt = datetime.fromtimestamp(dt)
     else:
         dt = datetime.now()
 
-    from_ = Stop.query.filter_by(name=from_).first()
-    to = Stop.query.filter_by(name=to).first()
+    from_ = Stop.query.filter_by(name=from_str).first()
+    to = Stop.query.filter_by(name=to_str).first()
     # TODO fuzzy match
     if not from_:
-        flash(f"No such stop '{from_}'", 'danger')
+        flash(f"No such stop '{from_str}'", 'danger')
         return redirect(g.redir)
     if not to:
-        flash(f"No such stop '{to}'", 'danger')
+        flash(f"No such stop '{to_str}'", 'danger')
         return redirect(g.redir)
     # TODO error check
     for from_ls in from_.lines:
