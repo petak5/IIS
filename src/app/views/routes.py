@@ -200,7 +200,7 @@ def admin_users():
 @app.route('/admin/users/add', methods=['POST'])
 @auth('admin')
 def admin_users_add():
-    login = request.form["login"]
+    login = request.form["login"].strip()
     password = request.form.get("password")
     role = request.form.get('role')
     operator_name = request.form.get('operator_name')
@@ -251,7 +251,7 @@ def admin_users_modify():
             user.password = password
         login = request.form.get('login')
         if login != None and login != '':
-            user.login = login
+            user.login = login.strip()
         if request.form.get('disable_login') == 'yes':
             user.password = None
         operator_id = request.form.get('operator_id')
@@ -319,7 +319,7 @@ def admin_operators_pick():
 @auth('admin')
 def admin_operators_add(): # TODO error handle
     name = request.form["name"]
-    login = request.form["login"]
+    login = request.form["login"].strip()
     password = request.form.get("password")
     operator = Operator(name)
     user = User.query.filter_by(login=login).first()
@@ -725,7 +725,7 @@ def operator_crew():
 @app.route('/operator/crew/add', methods=['POST'])
 @auth('operator')
 def operator_crew_add():
-    login = request.form["login"]
+    login = request.form["login"].strip()
     password = request.form['password']
     employer_id = g.operator.id
     if password == '':
@@ -959,6 +959,7 @@ def ticket_reserve():
         if login == None or login == '' or password == None or password == '':
             flash('Invalid request', 'danger')
             return redirect(g.redir)
+        login = login.strip()
         user = User(login, password)
         db.session.add(user)
         try:
@@ -1092,6 +1093,7 @@ def login():
         if login is None or password is None:
             flash("Incorrect login or password.", 'danger')
             return redirect(url_for('login'))
+        login = login.strip()
         user = login_user(login, password)
         load_user()
         if user is None:
