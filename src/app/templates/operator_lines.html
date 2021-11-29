@@ -31,16 +31,26 @@
               </td>
               <td>
                 {% if line.stops|count > 0 %}
-                  {{ line.stops[0].stop.name }}
+                  {% set stop_first = LineStop.query.filter_by(line=line).order_by(LineStop.position).first().stop %}
+                  {% if stop_first == None %}
+                    <span class="badge bg-warning">Deleted</span>
+                  {% else %}
+                    {{ stop_first.name }}
+                  {% endif%}
                 {% else %}
-                  None
+                  <span class="badge bg-secondary">None</span>
                 {% endif %}
               </td>
               <td>
                 {% if line.stops|count > 0 %}
-                  {{ line.stops[line.stops|count - 1].stop.name }}
+                  {% set stop_last = LineStop.query.filter_by(line=line).order_by(LineStop.position)[-1].stop %}
+                  {% if stop_last == None %}
+                    <span class="badge bg-warning">Deleted</span>
+                  {% else %}
+                    {{ stop_last.name }}
+                  {% endif %}
                 {% else %}
-                  None
+                  <span class="badge bg-secondary">None</span>
                 {% endif %}
               </td>
               <td align="right" width="1%" nowrap>

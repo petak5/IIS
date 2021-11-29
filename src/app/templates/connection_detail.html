@@ -27,7 +27,11 @@
           {% for stop in stops %}
             <tr>
               <td>
+                {% if stop['name'] == None %}
+                  <span class="badge bg-warning">Deleted</span>
+                {% else %}
                 {{ stop['name'] }}
+                {% endif %}
                 {% if stop['position'] == from_pos %}
                   <span class="badge bg-primary">From</span>
                 {% elif stop['position'] == to_pos %}

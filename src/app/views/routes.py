@@ -542,7 +542,7 @@ def operator_lines():
         else:
             flash('Only operator can view that page', 'danger')
             return redirect(g.redir)
-    return render_template('operator_lines.html', operator=g.operator)
+    return render_template('operator_lines.html', operator=g.operator, LineStop=LineStop)
 
 @app.route('/operator/lines/add', methods=['POST'])
 @auth('operator')
@@ -649,19 +649,17 @@ def operator_lines_stops_reorder():
         flash(f"Don't have access to operator", 'danger')
         return redirect(g.redir)
     if direction == "up":
-        stop.position -= 1
-        for ls in line.stops:
-            if ls.id == stop.id:
-                continue
-            if ls.position == stop.position:
+        if stop.position > 1:
+            ls = LineStop.query.filter_by(line=line, position=stop.position-1).first()
+            if ls:
                 ls.position += 1
+            stop.position -= 1
     else:
-        stop.position += 1
-        for ls in line.stops:
-            if ls.id == stop.id:
-                continue
-            if ls.position == stop.position:
+        if LineStop.query.filter_by(line=line).filter(LineStop.position > stop.position).first() != None:
+            ls = LineStop.query.filter_by(line=line, position=stop.position+1).first()
+            if ls:
                 ls.position -= 1
+            stop.position += 1
 
     db.session.commit()
     flash('Stop successfully moved.', 'success')
@@ -1093,17 +1091,30 @@ def user_tickets():
         delta = timedelta(0)
         for ls in LineStop.query.filter_by(line=line).order_by(LineStop.position):
             stop = {}
-            stop['name'] = ls.stop.name
+            stop['name'] = None
+            if ls.stop:
+                stop['name'] = ls.stop.name
             dt += timedelta(minutes=ls.time_delta)
             stop['time'] = dt
             stops[ls.position] = stop
         operator = line.operator
         t['ticket'] = ticket
-        t['start_name'] = stops[ticket.from_pos]['name']
-        t['start_time'] = stops[ticket.from_pos]['time']
-        t['end_name'] = stops[ticket.to_pos]['name']
-        t['end_time'] = stops[ticket.to_pos]['time']
-        t['duration'] = t['end_time'] - t['start_time']
+        if ticket.from_pos in stops:
+            t['start_name'] = stops[ticket.from_pos]['name']
+            t['start_time'] = stops[ticket.from_pos]['time']
+        else:
+            t['start_name'] = None
+            t['start_time'] = None
+        if ticket.to_pos in stops:
+            t['end_name'] = stops[ticket.to_pos]['name']
+            t['end_time'] = stops[ticket.to_pos]['time']
+        else:
+            t['end_name'] = None
+            t['end_time'] = None
+        if t['end_time'] != None and t['start_time'] != None:
+            t['duration'] = t['end_time'] - t['start_time']
+        else:
+            t['duration'] = None
         tickets.append(t)
     return render_template('user_tickets.html', user=g.user, tickets=tickets)
 
@@ -1182,7 +1193,9 @@ def connection_detail():
     delta = timedelta(0)
     for ls in LineStop.query.filter_by(line=line).order_by(LineStop.position):
         stop = {}
-        stop['name'] = ls.stop.name
+        stop['name'] = None
+        if ls.stop:
+            stop['name'] = ls.stop.name
         stop['position'] = ls.position
         dt += timedelta(minutes=ls.time_delta)
         stop['time'] = dt

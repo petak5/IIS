@@ -26,12 +26,21 @@
               <td scope="row">
                 {{ lineStop.position }}
               </td>
+              {% if lineStop.stop == None  %}
+              <td scope="row">
+                <span class="badge bg-warning">Deleted</span>
+              </td>
+              <td>
+                <span class="badge bg-warning">Deleted</span>
+              </td>
+              {% else %}
               <td scope="row">
                 {{ lineStop.stop.id }}
               </td>
               <td>
                 {{ lineStop.stop.name }}
               </td>
+              {% endif %}
               <td>
                 {{ lineStop.time_delta }}
               </td>
