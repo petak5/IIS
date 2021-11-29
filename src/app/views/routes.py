@@ -808,16 +808,69 @@ def operator_transfer():
         flash('Operator ownership successfully transferred.', 'success')
         return redirect(g.redir)
 
-@app.route('/crew/tickets', methods=['GET', 'POST'])
+@app.route('/crew/tickets')
 @auth('crew')
-def crew_tickets(): # TODO implement
+def crew_tickets():
     if not g.operator:
         if g.user.is_admin():
             return redirect(url_for('admin_operators_pick', redir=request.url))
         else:
             flash('Only crew can view that page', 'danger')
             return redirect(g.redir)
-    return render_template('placeholder.html')
+    return render_template('crew_tickets.html', Connection=Connection, operator=g.operator, Ticket=Ticket)
+
+@app.route('/crew/tickets/specific')
+@auth('crew')
+def crew_tickets_specific():
+    if not g.operator:
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only crew can view that page', 'danger')
+            return redirect(g.redir)
+    connection_id = request.args.get('connection_id', type=int)
+    connection = Connection.query.get(connection_id)
+    if not connection:
+        flash('No such connection', 'danger')
+        return redirect(g.redir)
+    return render_template('crew_tickets_specific.html', Ticket=Ticket, connection=connection, operator=g.operator)
+
+@app.route('/crew/tickets/issue', methods=['POST'])
+@auth('crew')
+def crew_tickets_issue():
+    if not g.operator:
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only crew can view that page', 'danger')
+            return redirect(g.redir)
+    ticket_id = request.form.get('id', type=int)
+    ticket = Ticket.query.get(ticket_id)
+    if not ticket:
+        flash('No such ticket', 'danger')
+        return redirect(g.redir)
+    flash("Pretend you just printed out a ticket successfuly", 'success')
+    return redirect(g.redir)
+
+@app.route('/crew/tickets/confirm', methods=['POST'])
+@auth('crew')
+def crew_tickets_confirm():
+    if not g.operator:
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only crew can view that page', 'danger')
+            return redirect(g.redir)
+    ticket_id = request.form.get('id', type=int)
+    ticket = Ticket.query.get(ticket_id)
+    if not ticket:
+        flash('No such ticket', 'danger')
+        return redirect(g.redir)
+    ticket.confirmed = True
+    db.session.add(ticket)
+    db.session.commit()
+    flash('Ticket reservation confirmed', 'success')
+    return redirect(g.redir)
 
 @app.route('/crew/positions')
 @auth('crew')

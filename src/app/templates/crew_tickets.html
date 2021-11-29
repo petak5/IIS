@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row p-3">
+      <div class="col">
+
+        <h2>Operator <b>{{ operator.name }}</b>'s connections</h2>
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Line ID</th>
+              <th scope="col">Line Name</th>
+              <th scope="col">From Stop</th>
+              <th scope="col">To Stop</th>
+              <th scope="col">Vehicle ID</th>
+              <th scope="col">Vehicle Description</th>
+              <th scope="col">Departure</th>
+              <th scope="col">Tickets</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for connection in Connection.query.order_by(Connection.id) %}
+              {% if connection.line.operator == operator %}
+                <tr>
+                  <td scope="row">
+                    {{ connection.id }}
+                  </td>
+                  <td>
+                    {{ connection.line.id }}
+                  </td>
+                  <td>
+                    {{ connection.line.name }}
+                  </td>
+                  <td>
+                    {% if connection.line.stops|count > 0 %}
+                      {{ connection.line.stops[0].stop.name }}
+                    {% else %}
+                      None
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if connection.line.stops|count > 0 %}
+                      {{ connection.line.stops[connection.line.stops|count - 1].stop.name }}
+                    {% else %}
+                      None
+                    {% endif %}
+                  </td>
+                  <td>
+                    {{ connection.vehicle.id }}
+                  </td>
+                  <td>
+                    {{ connection.vehicle.description }}
+                  </td>
+                  <td>
+                    {{ connection.start_time }}
+                  </td>
+                  <td>
+                    {{ Ticket.query.filter_by(connection=connection).count() }}
+                  </td>
+                  <td align="right" width="1%" nowrap>
+                    <a class="btn btn-primary" href="{{ url_for('crew_tickets_specific', connection_id=connection.id) }}">Manage Tickets</a>
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

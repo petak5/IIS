@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row p-3">
+      <div class="col">
+
+        <h2>Tickets for connection</h2>
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Login</th>
+              <th scope="col">Seats</th>
+              <th scope="col">From Stop</th>
+              <th scope="col">To Stop</th>
+              <th scope="col">Confirmed</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for ticket in Ticket.query.filter_by(connection=connection).order_by(Ticket.id) %}
+            <tr>
+              <td scope="row">
+                {{ ticket.id }}
+              </td>
+              <td>
+                {{ ticket.owner.login }}
+              </td>
+              <td>
+                {{ ticket.num_seats }}
+              </td>
+              <td>
+                {{ ticket.from_pos }}
+              </td>
+              <td>
+                {{ ticket.to_pos }}
+              </td>
+              <td>
+                {{ ticket.confirmed }}
+              </td>
+              <td align="right" width="1%" nowrap>
+                <form method="post" class="form-inline" nowrap>
+                  <input type="hidden" name="redir" value="{{ url_for('crew_tickets_specific', connection_id=connection.id) }}">
+                  <input type="hidden" name="id" value="{{ ticket.id }}">
+                  {% if ticket.confirmed %}
+                  <button type="submit" formaction="{{ url_for('crew_tickets_issue') }}" class="btn btn-primary">Issue Ticket</button>
+                  {% else %}
+                  <button type="submit" formaction="{{ url_for('crew_tickets_confirm') }}" class="btn btn-success">Confirm Reservation</button>
+                  {% endif %}
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
