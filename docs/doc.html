@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-2">
+<title>Projekt IIS</title>
+<style type="text/css">
+    table { border-collapse: collapse; }
+    td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
+    dt { font-weight: bold; margin-top: 0.5em; }
+</style>
+</head>
+<body>
+
+<!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu 
+     podle použitého editoru -->
+
+<h1>3. Hromadná doprava</h1>
+
+<dl>
+  <dt>Autori</dt>
+  <dd>Peter Mann
+    <a href="mailto:xautor02@stud.fit.vutbr.cz">xmannp00@stud.fit.vutbr.cz</a> -
+    vedúci týmu
+  </dd>
+  <dd>Peter Urgoš
+    <a href="mailto:xautor01@stud.fit.vutbr.cz">xurgos00@stud.fit.vutbr.cz</a>
+  </dd>
+  <dd>Simon Lapšanský
+    <a href="mailto:xautor03@stud.fit.vutbr.cz">xlapsa01@stud.fit.vutbr.cz</a>
+  </dd>
+  <dt>URL aplikáce</dt>
+  <dd><a href="http://iis.xdd.sk/">http://iis.xdd.sk/</a></dd>
+</dl>
+
+<h2>Užívatelia systému pre testovanie</h2>
+<table>
+  <tbody>
+  <tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+  <tr><td>admin</td><td>admin</td><td>Administrátor</td></tr>
+  <tr><td>operator</td><td>operator</td><td>Dopravca</td></tr>
+  <tr><td>crew</td><td>crew</td><td>Personál</td></tr>
+  <tr><td>user</td><td>user</td><td>Použivateľ</td></tr>
+  </tbody>
+</table>
+
+<h2>Implementácia</h2>
+<p>Stručná dokumentace k implementaci, která popisuje, které části
+  projektu (např. PHP skripty) implementují jednotlivé případy použití.</p>
+
+<h3>Databáza</h3>
+
+<img src="ER.svg"/>
+
+<h2>Inštalácia</h2>
+
+<h4>Požiadavky</h4>
+<ul>
+  <li>Python3.9+</li>
+  <li>pipenv</li>
+  <li>Databáza (testované s PostgreSQL)</li>
+</ul>
+
+<h4>Inštalácia balíčkov</h4>
+<ol>
+  <li>`cd src/`</li>
+  <li>`pipenv install` (run on first run or after Pipfile was changed)</li>
+</ol>
+
+<h4>Konfigurácia</h4>
+<ol>
+  <li>`cp .env_example .env`</li>
+  <li>Upravte konfiguráciu v súbore .env</li>
+</ol>
+
+<h4>Vytvorenie tabuliek v databázi</h4>
+<ol>
+  <li>`pipenv shell`</li>
+  <li>`flask db init`</li>
+  <li>`flask db migrate`</li>
+  <li>`flask db upgrade`</li>
+  <li>`exit`</li>
+</ol>
+<p>Poznámka: Kroky 3 a 4 musia byť zopakované po každej zmene kódu db modelu</p>
+
+<h4>Spustenie</h4>
+<ol>
+  <li>`pipenv run python run.py`</li>
+  <li>Aplikácia je dostupná na adrese 127.0.0.1:5000</li>
+</ol>
+
+<h2>Známe problémy</h2>
+<p>Rezervácia lístkov bez registrácie nie je podporená.</p>
+
+</body>
+</html>
