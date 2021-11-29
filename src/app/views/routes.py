@@ -877,8 +877,8 @@ def ticket_reserve():
 
 @app.route('/user/tickets', methods=['GET', 'POST'])
 @auth('user')
-def user_tickets(): # TODO implement
-    return render_template('placeholder.html')
+def user_tickets():
+    return render_template('user_tickets.html', user=g.user)
 
 @app.route('/')
 def index():

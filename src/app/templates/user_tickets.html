@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row p-3">
+      <div class="col">
+
+        <h2>My tickets</h2>
+
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">From Stop</th>
+              <th scope="col">To Stop</th>
+              <th scope="col">Departure</th>
+              <th scope="col">Arrival</th>
+              <th scope="col">Travel time</th>
+              <th scope="col">Operator</th>
+              <th scope="col">Confirmed</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for ticket in user.tickets %}
+            <tr>
+              <td scope="row">
+                {{ ticket.id }}
+              </td>
+              <td>
+                {{ ticket.from_pos }}
+              </td>
+              <td>
+                {{ ticket.to_pos }}
+              </td>
+              <td>
+                {{ ticket.connection.start_time }}
+              </td>
+              <td>
+                Not implemented
+              </td>
+              <td>
+                Not implemented
+              </td>
+              <td>
+                {{ ticket.connection.line.operator }}
+              </td>
+              <td>
+                {{ ticket.confirmed }}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
