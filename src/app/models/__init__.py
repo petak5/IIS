@@ -44,7 +44,7 @@ class User(Base):
 class StopProposal(Base):
     # if the proposal is for a new stop this remains unset
     original_id = db.Column(db.Integer, db.ForeignKey('stop.id'), default=None)
-    original = db.relationship("Stop", backref="proposals")
+    original = db.relationship("Stop", backref=db.backref("proposals", cascade='all,delete-orphan'))
     name = db.Column(db.String(128), nullable=False)
 
     def __init__(self, name, original=None):
@@ -61,15 +61,15 @@ class Stop(Base):
 class Line(Base):
     name = db.Column(db.String(128), nullable=False)
     operator_id = db.Column(db.Integer, db.ForeignKey('operator.id'), nullable=False)
-    operator = db.relationship("Operator", backref="lines")
-    stops = db.relationship("LineStop", back_populates="line")
+    operator = db.relationship("Operator", backref=db.backref("lines", cascade='all, delete-orphan'))
+    stops = db.relationship("LineStop", back_populates="line", cascade='all,delete-orphan')
 
     def __init__(self, name, operator):
         self.name = name
         self.operator = operator
 
 class LineStop(Base):
-    stop_id = db.Column(db.Integer, db.ForeignKey('stop.id'), nullable=False)
+    stop_id = db.Column(db.Integer, db.ForeignKey('stop.id'))
     stop = db.relationship("Stop", back_populates="lines")
     line_id = db.Column(db.Integer, db.ForeignKey('line.id'), nullable=False)
     line = db.relationship("Line", back_populates="stops")
@@ -85,9 +85,9 @@ class LineStop(Base):
 class Connection(Base):
     start_time = db.Column(db.DateTime, nullable=False)
     line_id = db.Column(db.Integer, db.ForeignKey('line.id'), nullable=False)
-    line = db.relationship("Line", backref="connections")
+    line = db.relationship("Line", backref=db.backref("connections", cascade='all, delete-orphan'))
     vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicle.id'), nullable=False)
-    vehicle = db.relationship("Vehicle", backref="connections")
+    vehicle = db.relationship("Vehicle", backref=db.backref("connections", cascade='all, delete-orphan'))
 
     def get_free_seats(self, from_pos, to_pos):
         if not LineStop.query.filter_by(line=self.line, position=from_pos).first():
@@ -102,7 +102,7 @@ class Connection(Base):
 
 class Vehicle(Base):
     operator_id = db.Column(db.Integer, db.ForeignKey('operator.id'), nullable=False)
-    operator = db.relationship("Operator", backref="vehicles")
+    operator = db.relationship("Operator", backref=db.backref("vehicles", cascade='all, delete-orphan'))
     description = db.Column(db.String(128), nullable=False, default='')
     num_seats = db.Column(db.Integer, nullable=False)
     last_known_stop_id = db.Column(db.Integer, db.ForeignKey('stop.id'), default=None)
@@ -122,10 +122,10 @@ class Operator(Base):
 
 class Ticket(Base):
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    owner = db.relationship(User, backref=db.backref("tickets", cascade='all, delete-orphan'))
     num_seats = db.Column(db.Integer, nullable=False, default=1)
-    owner = db.relationship(User, backref="tickets")
     connection_id = db.Column(db.Integer, db.ForeignKey('connection.id'))
-    connection = db.relationship(Connection, backref="tickets")
+    connection = db.relationship(Connection, backref=db.backref("tickets", cascade='all, delete-orphan')) # TODO
     from_pos = db.Column(db.Integer, nullable=False)
     to_pos = db.Column(db.Integer, nullable=False)
     confirmed = db.Column(db.Boolean, nullable=False, default=False)

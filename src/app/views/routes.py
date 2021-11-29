@@ -144,7 +144,9 @@ def admin_stops_delete():
         if not stop:
             flash('Stop doesn\'t exist', 'danger')
             return redirect(g.redir)
-
+        for ls in LineStop.query.filter_by(stop=stop):
+            ls.stop = None
+            db.session.add(ls)
         db.session.delete(stop)
         try:
             db.session.commit()
@@ -294,6 +296,8 @@ def admin_users_delete():
                 else:
                     employee.employer = None
                     db.session.add(employee)
+        for ticket in user.tickets:
+            db.session.delete(ticket)
         if user.operator:
             db.session.delete(user.operator)
         db.session.delete(user)
@@ -447,6 +451,9 @@ def operator_connections_add():
     dt = datetime.combine(date, time.time())
     vehicle_id = request.form.get("vehicle", type=int)
     vehicle = Vehicle.query.get(vehicle_id)
+    if not vehicle or not line or vehicle.operator != g.operator:
+        flash('Invalid request', 'danger')
+        return redirect(g.redir)
     connection = Connection(dt)
     connection.line = line
     connection.vehicle = vehicle
@@ -470,6 +477,9 @@ def operator_connections_stops():
         if not connection:
             flash('Connection doesn\'t exist', 'danger')
             return redirect(g.redir)
+        if connection.vehicle.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         line = connection.line
         stops = []
         dt = connection.start_time
@@ -487,7 +497,9 @@ def operator_connections_stops():
         if not connection:
             flash('Connection doesn\'t exist', 'danger')
             return redirect(g.redir)
-
+        if connection.vehicle.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         db.session.commit()
         flash('New stop successfully added.', 'success')
         return redirect(g.redir)
@@ -501,12 +513,18 @@ def operator_connections_delete():
         if not connection:
             flash('Connection doesn\'t exist', 'danger')
             return redirect(g.redir)
+        if connection.vehicle.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         return render_template('operator_connections_delete.html', connection=connection)
     elif request.method == 'POST':
         connection_id = request.form.get("id", type=int)
         connection = Connection.query.get(connection_id)
         if not connection:
             flash('Connection doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        if connection.vehicle.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
             return redirect(g.redir)
         for ticket in connection.tickets:
             db.session.delete(ticket)
@@ -545,12 +563,18 @@ def operator_lines_delete():
         if not line:
             flash('Line doesn\'t exist', 'danger')
             return redirect(g.redir)
+        if line.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         return render_template('operator_lines_delete.html', line=line)
     elif request.method == 'POST':
         line_id = request.form.get("id", type=int)
         line = Line.query.get(line_id)
         if not line:
             flash('Line doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        if line.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
             return redirect(g.redir)
         for connection in line.connections:
             db.session.delete(connection)
@@ -576,6 +600,9 @@ def operator_lines_stops():
         if not line:
             flash('Line doesn\'t exist', 'danger')
             return redirect(g.redir)
+        if line.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         return render_template('operator_lines_stops.html', Stop=Stop, LineStop=LineStop, line=line)
     elif request.method == 'POST':
         line_id = request.form.get("line_id", type=int)
@@ -587,6 +614,9 @@ def operator_lines_stops():
         line = Line.query.get(line_id)
         if not line:
             flash('Line doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        if line.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
             return redirect(g.redir)
         stop = Stop.query.get(stop_id)
         if not stop:
@@ -615,6 +645,9 @@ def operator_lines_stops_reorder():
         flash('Stop doesn\'t exist', 'danger')
         return redirect(g.redir)
     line = stop.line
+    if line.operator != g.operator:
+        flash(f"Don't have access to operator", 'danger')
+        return redirect(g.redir)
     if direction == "up":
         stop.position -= 1
         for ls in line.stops:
@@ -643,12 +676,18 @@ def operator_lines_stops_remove():
         if not lineStop:
             flash('Stop doesn\'t exist', 'danger')
             return redirect(g.redir)
+        if lineStop.line.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         return render_template('operator_lines_stops_remove.html', lineStop=lineStop)
     elif request.method == 'POST':
         stop_id = request.form.get("stop_id", type=int)
         lineStop = LineStop.query.get(stop_id)
         if not lineStop:
             flash('Stop doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        if lineStop.line.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
             return redirect(g.redir)
         line = lineStop.line
         db.session.delete(lineStop)
@@ -699,12 +738,18 @@ def operator_vehicles_remove():
         if not vehicle:
             flash('Vehicle doesn\'t exist', 'danger')
             return redirect(g.redir)
+        if vehicle.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         return render_template('operator_vehicles_remove.html', vehicle=vehicle)
     elif request.method == 'POST':
         vehicle_id = request.form.get("id", type=int)
         vehicle = Vehicle.query.get(vehicle_id)
         if not vehicle:
             flash('Vehicle doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        if vehicle.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
             return redirect(g.redir)
         db.session.delete(vehicle)
         db.session.commit()
@@ -752,12 +797,18 @@ def operator_crew_fire():
         if not user:
             flash('User doesn\'t exist', 'danger')
             return redirect(g.redir)
+        if user.employer != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         return render_template('operator_crew_fire.html', user=user)
     elif request.method == 'POST':
         user_id = request.form.get("id", type=int)
         user = User.query.get(user_id)
         if not user:
             flash('User doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        if user.employer != g.operator:
+            flash(f"Don't have access to operator", 'danger')
             return redirect(g.redir)
         user.employer = None
         db.session.commit()
@@ -773,12 +824,18 @@ def operator_crew_delete():
         if not user:
             flash('User doesn\'t exist', 'danger')
             return redirect(g.redir)
+        if user.employer != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         return render_template('operator_crew_delete.html', user=user)
     elif request.method == 'POST':
         user_id = request.form.get("id", type=int)
         user = User.query.get(user_id)
         if not user:
             flash('User doesn\'t exist', 'danger')
+            return redirect(g.redir)
+        if user.employer != g.operator:
+            flash(f"Don't have access to operator", 'danger')
             return redirect(g.redir)
         db.session.delete(user)
         db.session.commit()
@@ -794,6 +851,9 @@ def operator_transfer():
         if not user:
             flash('User doesn\'t exist', 'danger')
             return redirect(g.redir)
+        if user.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         return render_template('operator_transfer.html', User=User, user=user)
     elif request.method == 'POST':
         user_id = request.form.get("user_id", type=int)
@@ -801,7 +861,12 @@ def operator_transfer():
         if not user:
             flash('User doesn\'t exist', 'danger')
             return redirect(g.redir)
-        g.user.employer = g.operator
+        if user.employer != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
+        orig = g.operator.manager
+        orig.employer = g.operator
+        orig.operator = None
         g.operator.manager = user
         user.employer = None
         db.session.commit()
@@ -833,6 +898,9 @@ def crew_tickets_specific():
     if not connection:
         flash('No such connection', 'danger')
         return redirect(g.redir)
+    if connection.vehicle.operator != g.operator:
+        flash(f"Don't have access to operator", 'danger')
+        return redirect(g.redir)
     return render_template('crew_tickets_specific.html', Ticket=Ticket, connection=connection, operator=g.operator)
 
 @app.route('/crew/tickets/issue', methods=['POST'])
@@ -848,6 +916,9 @@ def crew_tickets_issue():
     ticket = Ticket.query.get(ticket_id)
     if not ticket:
         flash('No such ticket', 'danger')
+        return redirect(g.redir)
+    if ticket.connection.vehicle.operator != g.operator:
+        flash(f"Don't have access to operator", 'danger')
         return redirect(g.redir)
     flash("Pretend you just printed out a ticket successfuly", 'info')
     return redirect(g.redir)
@@ -865,6 +936,9 @@ def crew_tickets_cancel():
     ticket = Ticket.query.get(ticket_id)
     if not ticket:
         flash('No such ticket', 'danger')
+        return redirect(g.redir)
+    if ticket.connection.vehicle.operator != g.operator:
+        flash(f"Don't have access to operator", 'danger')
         return redirect(g.redir)
     db.session.delete(ticket)
     db.session.commit()
@@ -885,6 +959,9 @@ def crew_tickets_confirm():
     ticket = Ticket.query.get(ticket_id)
     if not ticket:
         flash('No such ticket', 'danger')
+        return redirect(g.redir)
+    if ticket.connection.vehicle.operator != g.operator:
+        flash(f"Don't have access to operator", 'danger')
         return redirect(g.redir)
     ticket.confirmed = True
     db.session.add(ticket)
@@ -912,6 +989,9 @@ def crew_positions_set():
         if not vehicle:
             flash('Vehicle doesn\'t exist', 'danger')
             return redirect(g.redir)
+        if vehicle.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
+            return redirect(g.redir)
         return render_template('crew_positions_set.html', vehicle=vehicle, Stop=Stop)
     elif request.method == 'POST':
         vehicle_id = request.form.get('id', type=int)
@@ -923,6 +1003,9 @@ def crew_positions_set():
         stop = Stop.query.filter_by(name=stop_name).first()
         if not stop or not vehicle:
             flash('Invalid request', 'danger')
+            return redirect(g.redir)
+        if vehicle.operator != g.operator:
+            flash(f"Don't have access to operator", 'danger')
             return redirect(g.redir)
         vehicle.last_known_stop = stop
         db.session.add(vehicle)
@@ -938,6 +1021,9 @@ def crew_positions_unset():
         vehicle = Vehicle.query.get(vehicle_id)
     else:
         vehicle = Vehicle.query.filter_by(operator=g.operator, id=vehicle_id).first()
+    if vehicle.operator != g.operator:
+        flash(f"Don't have access to operator", 'danger')
+        return redirect(g.redir)
     vehicle.last_known_stop = None
     db.session.add(vehicle)
     db.session.commit()
