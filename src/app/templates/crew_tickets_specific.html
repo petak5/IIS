@@ -50,7 +50,8 @@
                   {% if ticket.confirmed %}
                   <button type="submit" formaction="{{ url_for('crew_tickets_issue') }}" class="btn btn-primary">Issue Ticket</button>
                   {% else %}
-                  <button type="submit" formaction="{{ url_for('crew_tickets_confirm') }}" class="btn btn-success">Confirm Reservation</button>
+                  <button type="submit" formaction="{{ url_for('crew_tickets_cancel') }}" class="btn btn-danger">Cancel</button>
+                  <button type="submit" formaction="{{ url_for('crew_tickets_confirm') }}" class="btn btn-success">Confirm</button>
                   {% endif %}
                 </form>
               </td>

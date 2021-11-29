@@ -849,8 +849,28 @@ def crew_tickets_issue():
     if not ticket:
         flash('No such ticket', 'danger')
         return redirect(g.redir)
-    flash("Pretend you just printed out a ticket successfuly", 'success')
+    flash("Pretend you just printed out a ticket successfuly", 'info')
     return redirect(g.redir)
+
+@app.route('/crew/tickets/cancel', methods=['POST'])
+@auth('crew')
+def crew_tickets_cancel():
+    if not g.operator:
+        if g.user.is_admin():
+            return redirect(url_for('admin_operators_pick', redir=request.url))
+        else:
+            flash('Only crew can view that page', 'danger')
+            return redirect(g.redir)
+    ticket_id = request.form.get('id', type=int)
+    ticket = Ticket.query.get(ticket_id)
+    if not ticket:
+        flash('No such ticket', 'danger')
+        return redirect(g.redir)
+    db.session.delete(ticket)
+    db.session.commit()
+    flash('Ticket reservation cancelled', 'success')
+    return redirect(g.redir)
+
 
 @app.route('/crew/tickets/confirm', methods=['POST'])
 @auth('crew')
