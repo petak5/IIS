@@ -994,7 +994,32 @@ def ticket_reserve():
 @app.route('/user/tickets', methods=['GET', 'POST'])
 @auth('user')
 def user_tickets():
-    return render_template('user_tickets.html', user=g.user)
+    tickets = []
+    for ticket in g.user.tickets:
+        connection = ticket.connection
+        if not connection:
+            continue
+
+        line = connection.line
+        t = {}
+        stops = {}
+        dt = connection.start_time
+        delta = timedelta(0)
+        for ls in LineStop.query.filter_by(line=line).order_by(LineStop.position):
+            stop = {}
+            stop['name'] = ls.stop.name
+            dt += timedelta(minutes=ls.time_delta)
+            stop['time'] = dt
+            stops[ls.position] = stop
+        operator = line.operator
+        t['ticket'] = ticket
+        t['start_name'] = stops[ticket.from_pos]['name']
+        t['start_time'] = stops[ticket.from_pos]['time']
+        t['end_name'] = stops[ticket.to_pos]['name']
+        t['end_time'] = stops[ticket.to_pos]['time']
+        t['duration'] = t['end_time'] - t['start_time']
+        tickets.append(t)
+    return render_template('user_tickets.html', user=g.user, tickets=tickets)
 
 @app.route('/')
 def index():

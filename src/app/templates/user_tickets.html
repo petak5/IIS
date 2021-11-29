@@ -13,7 +13,6 @@
         <table class="table table-hover">
           <thead>
             <tr>
-              <th scope="col">ID</th>
               <th scope="col">Seats</th>
               <th scope="col">From Stop</th>
               <th scope="col">To Stop</th>
@@ -21,39 +20,44 @@
               <th scope="col">Arrival</th>
               <th scope="col">Travel time</th>
               <th scope="col">Operator</th>
+              <th scope="col">Vehicle</th>
+              <th scope="col">Last Location</th>
               <th scope="col">Confirmed</th>
               <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
-          {% for ticket in user.tickets %}
+          {% for t in tickets %}
             <tr>
-              <td scope="row">
-                {{ ticket.id }}
+              <td>
+                {{ t['ticket'].num_seats }}
               </td>
               <td>
-                {{ ticket.num_seats }}
+                {{ t['start_name'] }}
               </td>
               <td>
-                {{ ticket.from_pos }}
+                {{ t['end_name'] }}
               </td>
               <td>
-                {{ ticket.to_pos }}
+                {{ t['start_time'] }}
               </td>
               <td>
-                {{ ticket.connection.start_time }}
+                {{ t['end_time'] }}
               </td>
               <td>
-                Not implemented
+                {{ t['duration'] }}
               </td>
               <td>
-                Not implemented
+                {{ t['ticket'].connection.line.operator.name }}
               </td>
               <td>
-                {{ ticket.connection.line.operator.name }}
+                {{ t['ticket'].connection.vehicle.description }}
               </td>
               <td>
-                {{ ticket.confirmed }}
+                {% if t['ticket'].connection.vehicle.last_known_stop %}{{ t['ticket'].connection.vehicle.last_known_stop.name}}{% else %}<span class="badge bg-secondary">Unknown</span>{% endif %}
+              </td>
+              <td>
+                {{ t['ticket'].confirmed }}
               </td>
             </tr>
           {% endfor %}
