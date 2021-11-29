@@ -14,6 +14,7 @@
           <thead>
             <tr>
               <th scope="col">ID</th>
+              <th scope="col">Seats</th>
               <th scope="col">From Stop</th>
               <th scope="col">To Stop</th>
               <th scope="col">Departure</th>
@@ -31,6 +32,9 @@
                 {{ ticket.id }}
               </td>
               <td>
+                {{ ticket.num_seats }}
+              </td>
+              <td>
                 {{ ticket.from_pos }}
               </td>
               <td>
@@ -46,7 +50,7 @@
                 Not implemented
               </td>
               <td>
-                {{ ticket.connection.line.operator }}
+                {{ ticket.connection.line.operator.name }}
               </td>
               <td>
                 {{ ticket.confirmed }}
