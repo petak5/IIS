@@ -10,8 +10,8 @@
       <h4 class="py-3">Transfer ownership of operator <b>{{ user.operator.name }}</b></h4>
       <div class="mb-3">
         <label for="name" class="form-label">New manager</label>
-        <select class="form-select" name="user_id">
-          <option selected>Select User</option>
+        <select class="form-select" name="user_id" required>
+          <option value="" selected>Select User</option>
           {% for user in User.query.order_by(User.id).filter(User.employer == user.operator) %}
             <option value="{{ user.id }}">ID: {{ user.id }} - Login: {{ user.login }}</option>
           {% endfor %}
